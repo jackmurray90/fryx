@@ -103,7 +103,7 @@ class Exchange:
       return deposit_address.address
 
   def withdraw(self, api_key, asset_name, address, amount):
-    if not is_valid(amount):
+    if not is_valid(amount) or amount != assets[asset.name].round_down(amount):
       return 'Invalid amount'
     with Session(self.engine) as session:
       try:
@@ -114,7 +114,6 @@ class Exchange:
         [asset] = session.query(Asset).where(Asset.name == asset_name)
       except:
         return 'asset not found'
-      amount = assets[asset.name].round_down(amount)
       if amount < assets[asset.name].minimum_withdrawal():
         return 'amount too small'
       balance = self.get_balance(session, user, asset)

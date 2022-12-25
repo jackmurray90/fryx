@@ -1,10 +1,11 @@
 from monero.backends.jsonrpc import JSONRPCWallet
 from monero.wallet import Wallet
+from env import MONERO_RPC_PASSWORD
 
 MINCONF = 15
 
 def connect():
-  return Wallet(JSONRPCWallet(port=12345, user='abcd', password='abcd'))
+  return Wallet(JSONRPCWallet(host='10.128.0.4', user='tradeapi', password=MONERO_RPC_PASSWORD))
 
 class XMR:
   def height(self):

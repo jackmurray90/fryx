@@ -1,13 +1,14 @@
 from bitcoinrpc.authproxy import AuthServiceProxy
 from math import floor
 from decimal import Decimal
+from env import BITCOIN
 
 MINCONF = 2
 
 def connect():
-  rpc = AuthServiceProxy('http://:abcd@127.0.0.1:18332')
+  rpc = AuthServiceProxy(BITCOIN)
   try:
-    rpc.loadwallet("test")
+    rpc.loadwallet('tradeapi')
   except:
     pass
   return rpc
