@@ -89,3 +89,9 @@ class Trade(Base):
 
   user = relationship('User', back_populates='trades')
   market = relationship('Market')
+
+class RateLimit(Base):
+  __tablename__ = 'ratelimit'
+
+  address = Column(String, primary_key=True)
+  timestamp = Column(Numeric(17, 5))

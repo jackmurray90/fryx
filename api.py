@@ -1,25 +1,46 @@
 from flask import Flask, request, abort, render_template
 from exchange import Exchange
 from decimal import Decimal
+from db import RateLimit
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 from env import DB
+from time import time
 
 app = Flask(__name__)
 exchange = Exchange(DB)
+engine = create_engine(DB)
 
 @app.route('/')
 def api():
   return render_template('api.html')
 
+def rate_limit():
+  with Session(engine) as session:
+    try:
+      [rate_limit] = session.query(RateLimit).where(RateLimit.address == request.remote_addr)
+    except:
+      rate_limit = RateLimit(address=request.remote_addr, timestamp=0)
+      session.add(rate_limit)
+      session.commit()
+    if rate_limit.timestamp + 1 > time():
+      abort(429)
+    rate_limit.timestamp = time()
+    session.commit()
+
 @app.route('/new_user')
 def new_user():
+  rate_limit()
   return exchange.new_user()
 
 @app.route('/markets')
 def markets():
+  rate_limit()
   return exchange.markets()
 
 @app.route('/balance')
 def balance():
+  rate_limit()
   bal = exchange.balance(request.args['api_key'], request.args.get('asset'))
   if isinstance(bal, Decimal):
     return '%0.18f' % bal
@@ -27,18 +48,22 @@ def balance():
 
 @app.route('/orders')
 def orders():
+  rate_limit()
   return exchange.orders(request.args['api_key'])
 
 @app.route('/trades')
 def trades():
+  rate_limit()
   return exchange.trades(request.args['api_key'])
 
 @app.route('/deposit')
 def deposit():
+  rate_limit()
   return exchange.deposit(request.args['api_key'], request.args['asset'])
 
 @app.route('/withdraw')
 def withdraw():
+  rate_limit()
   try:
     amount = Decimal(request['amount'])
   except:
@@ -47,6 +72,7 @@ def withdraw():
 
 @app.route('/buy')
 def buy():
+  rate_limit()
   try:
     amount = Decimal(request['amount'])
   except:
@@ -59,6 +85,7 @@ def buy():
 
 @app.route('/sell')
 def sell():
+  rate_limit()
   try:
     amount = Decimal(request['amount'])
   except:
