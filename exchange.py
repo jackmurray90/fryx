@@ -2,7 +2,7 @@ from db import Asset, DepositAddress, User, Balance, Order, Market, OrderType, T
 from assets import assets
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-from secrets import randbits
+from entropy import random_128_bit_string
 from threading import Thread
 from time import sleep
 from hashlib import sha256
@@ -54,6 +54,23 @@ class Exchange:
           session.commit()
         sleep(0.1 if self.rapid_update else 1)
 
+  def check_user(self, api_key):
+    with Session(self.engine) as session:
+      try:
+        [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
+        return True
+      except:
+        return False
+
+  # API Methods
+
+  def markets(self):
+    with Session(self.engine) as session:
+      return [{
+        'asset': market.asset.name,
+        'currency': market.currency.name
+       } for market in session.query(Market)]
+
   def get_balance(self, session, user, asset):
     try:
       [balance] = session.query(Balance).where((Balance.user == user) & (Balance.asset == asset))
@@ -64,16 +81,7 @@ class Exchange:
     return balance
 
   def new_user(self):
-    num = randbits(128)
-    arr = []
-    arr_append = arr.append
-    _divmod = divmod
-    ALPHABET = "23456789abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
-    base = len(ALPHABET)
-    while num:
-        num, rem = _divmod(num, base)
-        arr_append(ALPHABET[rem])
-    api_key = ''.join(arr)
+    api_key = random_128_bit_string()
     user = User(api_key=hash_api_key(api_key))
     with Session(self.engine) as session:
       session.add(user)
@@ -127,6 +135,17 @@ class Exchange:
       session.commit()
       return 'Success'
 
+  def balances(self, api_key):
+    with Session(self.engine) as session:
+      try:
+        [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
+      except:
+        return 'api_key not found'
+      return [{
+        'asset': asset.name,
+        'amount': self.get_balance(session, user, asset).amount
+        } for asset in session.query(Asset).all()]
+
   def balance(self, api_key, asset_name):
     with Session(self.engine) as session:
       try:
@@ -165,7 +184,8 @@ class Exchange:
           'currency': trade.market.currency.name,
           'type': 'BUY' if trade.order_type == OrderType.BUY else 'SELL',
           'amount': trade.amount,
-          'price': trade.price
+          'price': trade.price,
+          'fee': trade.fee
         } for trade in user.trades]
 
   def buy(self, api_key, asset_name, currency_name, amount, price):

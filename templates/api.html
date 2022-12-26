@@ -1,0 +1,36 @@
+<!doctype html>
+<style>
+  table { border-collapse: collapse; margin: 1em; }
+  th, td { border: 1px solid #ccc; padding: 0.5em; }
+  ul, li { margin: 0; }
+</style>
+<p>
+  {% if api_key %}
+    <a href="/dashboard/balances">Balances</a>
+    <a href="/dashboard/orders">Orders</a>
+    <a href="/dashboard/trades">Trades</a>
+    <a href="/dashboard/settings">Settings</a>
+    <a href="/fees">Fees</a>
+    <form action="/logout" method="post" id='logout'><input type="submit" value="Logout"/>{{ csrf|safe }}</form>
+  {% else %}
+    <a href="/">Login</a>
+    <a href="/fees">Fees</a>
+  {% endif %}
+</p>
+<h1>tradeapi.net API</h1>
+<table>
+  <tr><th>Endpoint</th><td>URL Parameters</td><td>Description</td></tr>
+  <tr><th>/new_user</th><td>g-recaptcha-response</td><td>Generates a new API key. Must provide Google reCAPTCHA response.</td></tr>
+  <tr><th>/markets</th><td>None</td><td>Get a list of accepted markets</td></tr>
+  <tr><th>/balance</th><td><ul><li>api_key</li><li>asset</li></ul></td><td>Gets the balance of <u>asset</u>.</td></tr>
+  <tr><th>/balances</th><td><ul><li>api_key</li></ul></td><td>Gets the balances of all available assets.</td></tr>
+  <tr><th>/orders</th><td><ul><li>api_key</li></ul></td><td>Gets a list of your open orders.</td></tr>
+  <tr><th>/trades</th><td><ul><li>api_key</li></ul></td><td>Gets a list of the trades you have made.</td></tr>
+  <tr><th>/deposit</th><td><ul><li>api_key</li><li>asset</li></ul></td><td>Gets a deposit address for <u>asset</u>.</td></tr>
+  <tr><th>/withdraw</th><td><ul><li>api_key</li><li>asset</li><li>amount</li></ul></td>
+    <td>Withdraws <u>amount</u> of <u>asset</u> to <u>address</u> (excludes <a href='/fees'>withdrawal fee</a>).</td></tr>
+  <tr><th>/buy</th><td><ul><li>api_key</li><li>asset</li><li>currency</li><li>amount</li><li>price</li></ul></td>
+    <td>Creates a buy order to buy <u>amount</u> of <u>asset</u> paying with <u>currency</u> at <u>price</u> or below.</td></tr>
+  <tr><th>/sell</th><td><ul><li>api_key</li><li>asset</li><li>currency</li><li>amount</li><li>price</li></ul></td>
+    <td>Creates a sell order to sell <u>amount</u> of <u>asset</u> accepting <u>currency</u> at <u>price</u> or above.</td></tr>
+</table>

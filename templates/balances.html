@@ -1,0 +1,27 @@
+<!doctype html>
+<style>
+  table { border-collapse: collapse; margin: 1em; }
+  th, td { border: 1px solid #ccc; padding: 1em; }
+  #logout { display: inline; }
+</style>
+<p>
+  {% for market in markets %}
+    <a href='/market?asset={{ market["asset"] }}&currency={{ market["currency"] }}'>
+      {{ market['asset'] }}/{{ market['currency'] }}
+    </a>
+  {% endfor %}
+</p>
+<p>
+  <a href="/dashboard/orders">Orders</a>
+  <a href="/dashboard/trades">Trades</a>
+  <a href="/dashboard/settings">Settings</a>
+  <a href="/api">API Documentation</a>
+  <a href="/fees">Fees</a>
+  <form action="/logout" method="post" id='logout'><input type="submit" value="Logout"/>{{ csrf|safe }}</form>
+</p>
+<h1>Balances</h1>
+<table>
+  {% for balance in balances %}
+    <tr><td>{{ balance['asset'] }}</td><td>{{ balance['amount'] }}</td></tr>
+  {% endfor %}
+</table>

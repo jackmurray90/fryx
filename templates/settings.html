@@ -1,0 +1,25 @@
+<!doctype html>
+<style>
+  table { border-collapse: collapse; margin: 1em; }
+  th, td { border: 1px solid #ccc; padding: 1em; }
+  #logout { display: inline; }
+</style>
+<p>
+  {% for market in markets %}
+    <a href='/market?asset={{ market["asset"] }}&currency={{ market["currency"] }}'>
+      {{ market['asset'] }}/{{ market['currency'] }}
+    </a>
+  {% endfor %}
+</p>
+<p>
+  <a href="/dashboard/balances">Balances</a>
+  <a href="/dashboard/orders">Orders</a>
+  <a href="/dashboard/trades">Trades</a>
+  <a href="/api">API Documentation</a>
+  <a href="/fees">Fees</a>
+  <form action="/logout" method="post" id='logout'><input type="submit" value="Logout"/>{{ csrf|safe }}</form>
+</p>
+<h1>tradeapi.net API Key and password</h1>
+<p>Your API key and password is: {{ api_key }}</p>
+<p>Please print this out and store it in a secure location, as it is the only way to access your account.</p>
+<p>Anybody with this key will be able to make trades and withdrawals using your account.</p>

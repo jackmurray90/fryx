@@ -1,40 +1,17 @@
 <!doctype html>
-<head>
-<style> body { font-family: monospace; } table { border-collapse: collapse; margin: 1em; } th, td { border: 1px solid #ccc; padding: 1em; } ul, li { margin: 0; }</style>
 <script src="https://www.google.com/recaptcha/api.js"></script>
 <script> function onSubmit(token) { document.getElementById("new_user").submit(); } </script>
-</head>
-<body>
-  <p>Welcome to tradeapi.net, an open-source cryptocurrency exchange by bot developers, for bot developers.<p>
-  {% if api_key %}
-  <p>Your API key is: {{ api_key }}</p>
-  <p>Please write this down on paper in a secure location as it is the only way to access your account.</p>
-  <p>Please keep this API key safe as it enables anybody to make trades and withdrawals with your account.</p>
-  <p>This is the only time we will show you this API key. It will not be shown if you refresh the page or bookmark it for later.</p>
-  {% else %}
-  <form id="new_user" action="/new_user_html">
-    <button class="g-recaptcha" data-sitekey="6Le6VaQjAAAAAGqzWtXquUn73ltoxbcAK-XTGlsQ" data-callback='onSubmit' data-action='submit'>Click here to generate your API key.</button>
-  </form>
-  {% endif %}
-  <table>
-    <tr><th>Endpoint</th><td>URL Parameters</td><td>Description</td></tr>
-    <tr><th>/new_user</th><td>g-recaptcha-response</td><td>Generates a new API key. Must provide Google reCAPTCHA response.</td></tr>
-    <tr><th>/markets</th><td>None</td><td>Get a list of accepted markets</td></tr>
-    <tr><th>/balance</th><td><ul><li>api_key</li><li>asset</li></ul></td><td>Gets the balance of <em>asset</em>.</td></tr>
-    <tr><th>/orders</th><td><ul><li>api_key</li></ul></td><td>Gets a list of your open orders.</td></tr>
-    <tr><th>/trades</th><td><ul><li>api_key</li></ul></td><td>Gets a list of the trades you have made.</td></tr>
-    <tr><th>/deposit</th><td><ul><li>api_key</li><li>asset</li></ul></td><td>Gets a deposit address for <em>asset</em>.</td></tr>
-    <tr><th>/withdraw</th><td><ul><li>api_key</li><li>asset</li><li>amount</li></ul></td>
-      <td>Withdraws <em>amount</em> of <em>asset</em> to <em>address</em> (excludes withdrawal fee, listed below).</td></tr>
-    <tr><th>/buy</th><td><ul><li>api_key</li><li>asset</li><li>currency</li><li>amount</li><li>price</li></ul></td>
-      <td>Creates a buy order to buy <em>amount</em> of <em>asset</em> paying with <em>currency</em> at <em>price</em> or below.</td></tr>
-    <tr><th>/sell</th><td><ul><li>api_key</li><li>asset</li><li>currency</li><li>amount</li><li>price</li></ul></td>
-      <td>Creates a sell order to sell <em>amount</em> of <em>asset</em> accepting <em>currency</em> at <em>price</em> or above.</td></tr>
-  </table>
-  Fees:
-  <table>
-    <tr><th>Trades</th><td>0.1%</td></tr>
-    <tr><th>BTC Withdrawal</th><td>0.0001 BTC</td></tr>
-    <tr><th>XMR Withdrawal</th><td>0.01 XMR</td></tr>
-  </table>
-</body>
+<h1>tradeapi.net<small>, an open-source cryptocurrency exchange.</small></h1>
+{% if invalid_login %}
+  <p>Incorrect password.</p>
+{% endif %}
+<form id="new_user" action="/register" method='post'>
+  <button class="g-recaptcha" data-sitekey="6Le6VaQjAAAAAGqzWtXquUn73ltoxbcAK-XTGlsQ" data-callback='onSubmit' data-action='submit'>Register a new account.</button>
+  {{ csrf|safe }}
+</form>
+<p>or</p>
+<form action="/login" method="post">
+  <input type="password" name="api_key"/>
+  <input type="submit" value="Login"/>
+  {{ csrf|safe }}
+</form>
