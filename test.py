@@ -9,11 +9,10 @@ from sqlalchemy.orm import Session
 from mock_blockchain import MockBlockchain
 from time import sleep
 from blockchain_monitor import blockchain_monitor
-
-DB = 'postgresql://:@localhost/tradeapi_test'
+from env import TEST_DB
 
 def fresh_exchange():
-  engine = create_engine(DB)
+  engine = create_engine(TEST_DB)
   Base.metadata.drop_all(engine)
   Base.metadata.create_all(engine)
   blockchain_monitor.stop()
@@ -22,8 +21,8 @@ def fresh_exchange():
   session.commit()
   assets['BTC'] = MockBlockchain(8)
   assets['XMR'] = MockBlockchain(12)
-  blockchain_monitor.start(DB, True)
-  return Exchange(DB)
+  blockchain_monitor.start(TEST_DB, True)
+  return Exchange(TEST_DB)
 
 def deposit(asset, address, amount):
   assets[asset].deposit(address, amount)
