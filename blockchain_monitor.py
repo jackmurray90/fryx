@@ -16,8 +16,7 @@ class BlockchainMonitor:
     self.rapid_update = rapid_update
     with Session(self.engine) as session:
       for asset in session.query(Asset):
-        if asset.name != 'XMR' or not __name__ == '__main__':
-          Thread(target=self.monitor_blockchain, args=(asset.name,)).start()
+        Thread(target=self.monitor_blockchain, args=(asset.name,)).start()
 
   def stop(self):
     self.running = False
