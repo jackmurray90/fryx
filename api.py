@@ -95,3 +95,8 @@ def sell():
   except:
     return 'Invalid price'
   return exchange.sell(request.args['api_key'], request.args['asset'], request.args['currency'], amount, price)
+
+@app.route('/cancel')
+def cancel():
+  rate_limit()
+  return exchange.cancel(request.args['api_key'], request.args['order_id'])

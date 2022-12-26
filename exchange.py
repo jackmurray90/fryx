@@ -141,6 +141,7 @@ class Exchange:
       except:
         return 'api_key not found'
       return [{
+          'id': order.id,
           'asset': order.market.asset.name,
           'currency': order.market.currency.name,
           'type': 'BUY' if order.order_type == OrderType.BUY else 'SELL',
@@ -286,5 +287,19 @@ class Exchange:
         session.add(order)
         session.commit()
         return order.id
+      session.commit()
+      return 'Success'
+
+  def cancel(api_key, order_id):
+    with Session(self.engine) as session:
+      try:
+        [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
+      except:
+        return 'api_key not found'
+      try:
+        [order] = session.query(Order).where((Order.id == order_id) & (Order.user == user))
+      except:
+        return 'Order not found'
+      session.delete(order)
       session.commit()
       return 'Success'
