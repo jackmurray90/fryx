@@ -2,13 +2,13 @@ from db import Asset, DepositAddress, User, Balance, Order, Market, OrderType, T
 from assets import assets
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-from entropy import random_128_bit_string
 from threading import Thread
 from time import sleep
 from hashlib import sha256
 from math import floor, ceil
 from decimal import Decimal
 from signal import signal, SIGTERM, SIGINT
+from secrets import randbits
 
 def hash_api_key(api_key):
   return sha256(api_key.encode('utf-8')).hexdigest()
@@ -31,17 +31,19 @@ class Exchange:
     self.stopped = False
     with Session(self.engine) as session:
       for asset in session.query(Asset):
-        Thread(target=self.monitor_blockchain, args=(asset,)).start()
+        Thread(target=self.monitor_blockchain, args=(asset.name,)).start()
     signal(SIGINT, self.stop)
     signal(SIGTERM, self.stop)
 
   def stop(self, *args):
     self.stopped = True
 
-  def monitor_blockchain(self, asset):
+  def monitor_blockchain(self, asset_name):
     with Session(self.engine) as session:
+      [asset] = session.query(Asset).where(Asset.name == asset_name)
       while not self.stopped:
         while asset.height < assets[asset.name].height():
+          print("Polling height=",asset.height)
           for address, amount in assets[asset.name].get_incoming_txs(asset.height):
             try:
               [deposit_address] = session.query(DepositAddress).where(DepositAddress.address == address)
@@ -81,7 +83,16 @@ class Exchange:
     return balance
 
   def new_user(self):
-    api_key = random_128_bit_string()
+    num = randbits(128) if secure else getrandbits(128)
+    arr = []
+    arr_append = arr.append
+    _divmod = divmod
+    ALPHABET = "23456789abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
+    base = len(ALPHABET)
+    while num:
+      num, rem = _divmod(num, base)
+      arr_append(ALPHABET[rem])
+    api_key = ''.join(arr)
     user = User(api_key=hash_api_key(api_key))
     with Session(self.engine) as session:
       session.add(user)
@@ -135,29 +146,24 @@ class Exchange:
       session.commit()
       return 'Success'
 
-  def balances(self, api_key):
-    with Session(self.engine) as session:
-      try:
-        [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
-      except:
-        return 'api_key not found'
-      return [{
-        'asset': asset.name,
-        'amount': self.get_balance(session, user, asset).amount
-        } for asset in session.query(Asset).all()]
-
   def balance(self, api_key, asset_name):
     with Session(self.engine) as session:
       try:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
         return 'api_key not found'
-      try:
-        [asset] = session.query(Asset).where(Asset.name == asset_name)
-      except:
-        return 'asset not found'
-      balance = self.get_balance(session, user, asset)
-      return balance.amount
+      if asset_name is None:
+        return [{
+          'asset': asset.name,
+          'amount': self.get_balance(session, user, asset).amount
+          } for asset in session.query(Asset).all()]
+      else:
+        try:
+          [asset] = session.query(Asset).where(Asset.name == asset_name)
+        except:
+          return 'asset not found'
+        balance = self.get_balance(session, user, asset)
+        return balance.amount
 
   def orders(self, api_key):
     with Session(self.engine) as session:
