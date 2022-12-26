@@ -20,7 +20,10 @@ def markets():
 
 @app.route('/balance')
 def balance():
-  return exchange.balance(request.args['api_key'], request.args['asset'])
+  bal = exchange.balance(request.args['api_key'], request.args.get('asset'))
+  if isinstance(bal, Decimal):
+    return '%0.18f' % bal
+  return bal
 
 @app.route('/orders')
 def orders():
