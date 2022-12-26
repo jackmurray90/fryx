@@ -8,6 +8,7 @@ from db import Base, Market, Asset
 from sqlalchemy.orm import Session
 from mock_blockchain import MockBlockchain
 from time import sleep
+from blockchain_monitor import blockchain_monitor
 
 DB = 'postgresql://:@localhost/tradeapi_test'
 
@@ -15,12 +16,14 @@ def fresh_exchange():
   engine = create_engine(DB)
   Base.metadata.drop_all(engine)
   Base.metadata.create_all(engine)
+  blockchain_monitor.stop()
   session = Session(engine)
   session.add(Market(asset=Asset(name='XMR', height=0), currency=Asset(name='BTC', height=0)))
   session.commit()
   assets['BTC'] = MockBlockchain(8)
   assets['XMR'] = MockBlockchain(12)
-  return Exchange(DB, rapid_update=True)
+  blockchain_monitor.start(DB, True)
+  return Exchange(DB)
 
 def deposit(asset, address, amount):
   assets[asset].deposit(address, amount)
@@ -45,7 +48,7 @@ class TestExchange(TestCase):
     self.assertEqual(exchange.balance(user, 'XMR'), 0)
     deposit('XMR', '1xmraddress', Decimal('0.015'))
     self.assertEqual(exchange.balance(user, 'XMR'), Decimal('0.015'))
-    exchange.stop()
+    blockchain_monitor.stop()
 
   def test_withdrawal(self):
     exchange = fresh_exchange()
@@ -66,7 +69,7 @@ class TestExchange(TestCase):
         ('1btcaddress', Decimal('0.005')),
         ('1btcaddress', Decimal('0.0025'))
       ])
-    exchange.stop()
+    blockchain_monitor.stop()
 
   def test_trades(self):
     exchange = fresh_exchange()
@@ -91,25 +94,27 @@ class TestExchange(TestCase):
       {
         'asset': 'XMR',
         'currency': 'BTC',
+        'type': 'BUY',
         'amount': Decimal('0.01'),
         'price': Decimal('0.01'),
-        'type': 'BUY'
+        'fee': Decimal('0.0001') * Decimal('0.001')
       }
     ])
     self.assertEqual(exchange.trades(user2), [
       {
         'asset': 'XMR',
         'currency': 'BTC',
+        'type': 'SELL',
         'amount': Decimal('0.01'),
         'price': Decimal('0.01'),
-        'type': 'SELL'
+        'fee': Decimal('0.0001') * Decimal('0.001')
       }
     ])
     self.assertEqual(exchange.balance(user1, 'BTC'), Decimal('0.01')-Decimal('0.0001'))
     self.assertEqual(exchange.balance(user2, 'BTC'), Decimal('0.0001')-Decimal('0.0001')*Decimal('0.001'))
     self.assertEqual(exchange.balance(user1, 'XMR'), Decimal('0.01'))
     self.assertEqual(exchange.balance(user2, 'XMR'), Decimal('0.99'))
-    exchange.stop()
+    blockchain_monitor.stop()
 
 if __name__ == '__main__':
   main()

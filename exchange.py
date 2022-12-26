@@ -2,12 +2,9 @@ from db import Asset, DepositAddress, User, Balance, Order, Market, OrderType, T
 from assets import assets
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-from threading import Thread
-from time import sleep
 from hashlib import sha256
 from math import floor, ceil
 from decimal import Decimal
-from signal import signal, SIGTERM, SIGINT
 from secrets import randbits
 
 def hash_api_key(api_key):
@@ -25,36 +22,8 @@ def is_valid(amount):
 FEE = Decimal('0.001')
 
 class Exchange:
-  def __init__(self, db, rapid_update=False):
+  def __init__(self, db):
     self.engine = create_engine(db)
-    self.rapid_update = rapid_update
-    self.stopped = False
-    with Session(self.engine) as session:
-      for asset in session.query(Asset):
-        Thread(target=self.monitor_blockchain, args=(asset.name,)).start()
-    signal(SIGINT, self.stop)
-    signal(SIGTERM, self.stop)
-
-  def stop(self, *args):
-    self.stopped = True
-
-  def monitor_blockchain(self, asset_name):
-    with Session(self.engine) as session:
-      [asset] = session.query(Asset).where(Asset.name == asset_name)
-      while not self.stopped:
-        while asset.height < assets[asset.name].height():
-          print("Polling height=",asset.height)
-          for address, amount in assets[asset.name].get_incoming_txs(asset.height):
-            try:
-              [deposit_address] = session.query(DepositAddress).where(DepositAddress.address == address)
-            except:
-              continue
-            balance = self.get_balance(session, deposit_address.user, asset)
-            balance.amount += amount
-            session.commit()
-          asset.height += 1
-          session.commit()
-        sleep(0.1 if self.rapid_update else 1)
 
   def check_user(self, api_key):
     with Session(self.engine) as session:
@@ -122,8 +91,6 @@ class Exchange:
       return deposit_address.address
 
   def withdraw(self, api_key, asset_name, address, amount):
-    if not is_valid(amount) or amount != assets[asset.name].round_down(amount):
-      return 'Invalid amount'
     with Session(self.engine) as session:
       try:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
@@ -133,6 +100,8 @@ class Exchange:
         [asset] = session.query(Asset).where(Asset.name == asset_name)
       except:
         return 'asset not found'
+      if not is_valid(amount) or amount != assets[asset.name].round_down(amount):
+        return 'Invalid amount'
       if amount < assets[asset.name].minimum_withdrawal():
         return 'amount too small'
       balance = self.get_balance(session, user, asset)
