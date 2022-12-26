@@ -83,7 +83,7 @@ class Exchange:
     return balance
 
   def new_user(self):
-    num = randbits(128) if secure else getrandbits(128)
+    num = randbits(128)
     arr = []
     arr_append = arr.append
     _divmod = divmod
