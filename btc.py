@@ -1,7 +1,9 @@
-from bitcoinrpc.authproxy import AuthServiceProxy
+from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
 from math import floor
 from decimal import Decimal
 from env import BITCOIN
+from time import sleep
+from http.client import CannotSendRequest
 
 MINCONF = 2
 
@@ -9,31 +11,47 @@ def connect():
   rpc = AuthServiceProxy(BITCOIN)
   try:
     rpc.loadwallet('tradeapi')
-  except:
+  except JSONRPCException:
     pass
   return rpc
 
 class BTC:
   def height(self):
-    rpc = connect()
-    return rpc.getblockcount() - MINCONF
+    while True:
+      try:
+        rpc = connect()
+        return rpc.getblockcount() - MINCONF
+      except CannotSendRequest:
+        sleep(1)
 
   def get_incoming_txs(self, height):
-    rpc = connect()
-    txs = rpc.listsinceblock(rpc.getblockhash(height-1))
-    incoming_txs = []
-    for tx in txs['transactions']:
-      if tx['category'] == 'receive' and tx['blockheight'] == height:
-        incoming_txs.append((tx['address'], tx['amount']))
-    return incoming_txs
+    while True:
+      try:
+        rpc = connect()
+        txs = rpc.listsinceblock(rpc.getblockhash(height-1))
+        incoming_txs = []
+        for tx in txs['transactions']:
+          if tx['category'] == 'receive' and tx['blockheight'] == height:
+            incoming_txs.append((tx['address'], tx['amount']))
+        return incoming_txs
+      except CannotSendRequest:
+        sleep(1)
 
   def withdraw(self, address, amount):
-    rpc = connect()
-    rpc.send({address: amount})
+    while True:
+      try:
+        rpc = connect()
+        rpc.send({address: amount})
+      except CannotSendRequest:
+        sleep(1)
 
   def get_new_deposit_address(self):
-    rpc = connect()
-    return rpc.getnewaddress()
+    while True:
+      try:
+        rpc = connect()
+        return rpc.getnewaddress()
+      except CannotSendRequest:
+        sleep(1)
 
   def minimum_withdrawal(self):
     return Decimal('0.0001')
