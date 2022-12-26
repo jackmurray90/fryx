@@ -20,16 +20,11 @@ class BTC:
 
   def get_incoming_txs(self, height):
     rpc = connect()
-    block = rpc.getblock(rpc.getblockhash(height))
+    txs = rpc.listsinceblock(rpc.getblockhash(height-1))
     incoming_txs = []
-    for txid in block['tx']:
-      try:
-        transaction = rpc.gettransaction(txid)
-      except:
-        continue
-      for details in transaction['details']:
-        if details['category'] == 'receive':
-          incoming_txs.append((details['address'], details['amount']))
+    for tx in txs['transactions']:
+      if tx['category'] == 'receive' and tx['blockheight'] == height:
+        incoming_txs.append((tx['address'], tx['amount']))
     return incoming_txs
 
   def withdraw(self, address, amount):
