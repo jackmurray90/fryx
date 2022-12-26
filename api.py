@@ -1,10 +1,14 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort, render_template
 from exchange import Exchange
 from decimal import Decimal
 from env import DB
 
 app = Flask(__name__)
 exchange = Exchange(DB)
+
+@app.route('/')
+def api():
+  return render_template('api.html')
 
 @app.route('/new_user')
 def new_user():
