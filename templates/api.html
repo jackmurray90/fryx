@@ -4,9 +4,11 @@
   th, td { border: 1px solid #ccc; padding: 0.5em; }
   ul, li { margin: 0; }
 </style>
-<h1>tradeapi.net</h1>
+<h1>Trade API</h1>
 <p>Trade API is an <a href="https://github.com/jackmurray90/tradeapi">open source</a> cryptocurrency exchange written by a team consisting of AI and a <a href="https://murray.software/">human</a>.</p>
+<p>So far this host has {{ total_users }} registered users.</p>
 <p>Requests are rate-limited at one request per second per user.</p>
+<h2>API Documentation</h2>
 <table>
   <tr><th>Endpoint</th><th>URL Parameters</th><th>Description</th><th>Example Response</th></tr>
   <tr><th>/new_user</th><td>None</td><td>Generates a new API key.</td><td>iQtxykjG48y3F9A93jRPqC</td></tr>
@@ -19,7 +21,7 @@
     <td>[{"amount":"0.010000000000000000", "asset":"XMR", "currency":"BTC", "fee":"1.000000000E-9", "price":"0.010000000000000000", "type":"BUY"}]</td></tr>
   <tr><th>/deposit</th><td><ul><li>api_key</li><li>asset</li></ul></td><td>Gets a deposit address for <u>asset</u>.</td><td>bc1qh5jnz3tjtvththmd0sjru5sq97p8e9qj9mm794</td></tr>
   <tr><th>/withdraw</th><td><ul><li>api_key</li><li>asset</li><li>amount</li></ul></td>
-    <td>Withdraws <u>amount</u> of <u>asset</u> to <u>address</u> (excludes withdrawal fees below).</td><td>Success</td></tr>
+    <td>Withdraws <u>amount</u> of <u>asset</u> to <u>address</u>.<br/>Remember to leave enough for withdrawal fees in your account.</td><td>Success</td></tr>
   <tr><th>/buy</th><td><ul><li>api_key</li><li>asset</li><li>currency</li><li>amount</li><li>price</li></ul></td>
     <td>Creates a buy order to buy <u>amount</u> of <u>asset</u> paying with <u>currency</u> at <u>price</u> or below. Returns the <u>order_id</u>.</td><td>1</td></tr>
   <tr><th>/sell</th><td><ul><li>api_key</li><li>asset</li><li>currency</li><li>amount</li><li>price</li></ul></td>

@@ -13,7 +13,8 @@ engine = create_engine(DB)
 
 @app.route('/')
 def api():
-  return render_template('api.html')
+  with Session(engine) as session:
+    return render_template('api.html', total_users=session.query(User).count())
 
 def rate_limit(ip=False):
   with Session(engine) as session:
