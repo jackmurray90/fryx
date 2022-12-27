@@ -71,6 +71,7 @@ class Order(Base):
   market_id = Column(Integer, ForeignKey('markets.id'))
   order_type = Column(Enum(OrderType))
   amount = Column(Numeric(28, 18))
+  executed = Column(Numeric(28, 18))
   price = Column(Numeric(28, 18))
 
   user = relationship('User', back_populates='orders')

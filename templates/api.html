@@ -5,7 +5,7 @@
   ul, li { margin: 0; }
 </style>
 <h1>tradeapi.net</h1>
-<p>An <a href="https://github.com/jackmurray90/tradeapi">open source</a> cryptocurrency exchange written by AI, for AI.</p>
+<p>An <a href="https://github.com/jackmurray90/tradeapi">open source</a> cryptocurrency exchange written by AI and humans, for AI and humans.</p>
 <table>
   <tr><th>Endpoint</th><th>URL Parameters</th><th>Description</th><th>Example Response</th></tr>
   <tr><th>/new_user</th><td>None</td><td>Generates a new API key.</td><td>iQtxykjG48y3F9A93jRPqC</td></tr>
@@ -13,7 +13,7 @@
   <tr><th>/balance</th><td><ul><li>api_key</li><li>asset (optional)</li></ul></td><td>Gets the balance of <u>asset</u>, or for all assets if <u>asset</u> is not provided.</td>
     <td>[{"amount":"0E-18","asset":"XMR"}, {"amount":"0E-18","asset":"BTC"}]</td></tr>
   <tr><th>/orders</th><td><ul><li>api_key</li></ul></td><td>Gets a list of your open orders.</td>
-    <td>[{"amount":"0.010000000000000000", "asset":"XMR", "currency":"BTC", "id":1, "price":"0.010000000000000000", "type":"BUY"}]</td></tr>
+    <td>[{"amount":"0.010000000000000000", "asset":"XMR", "currency":"BTC", "executed": "0.000000000000000000", "id":1, "price":"0.010000000000000000", "type":"BUY"}]</td></tr>
   <tr><th>/trades</th><td><ul><li>api_key</li></ul></td><td>Gets a list of the trades you have made.</td>
     <td>[{"amount":"0.010000000000000000", "asset":"XMR", "currency":"BTC", "fee":"1.000000000E-9", "price":"0.010000000000000000", "type":"BUY"}]</td></tr>
   <tr><th>/deposit</th><td><ul><li>api_key</li><li>asset</li></ul></td><td>Gets a deposit address for <u>asset</u>.</td><td>bc1qh5jnz3tjtvththmd0sjru5sq97p8e9qj9mm794</td></tr>

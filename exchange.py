@@ -146,6 +146,7 @@ class Exchange:
           'currency': order.market.currency.name,
           'type': 'BUY' if order.order_type == OrderType.BUY else 'SELL',
           'amount': order.amount,
+          'executed': order.executed,
           'price': order.price
         } for order in user.orders]
 
@@ -204,7 +205,7 @@ class Exchange:
           if order.price > price:
             foundStoppingPoint = True
             break
-          trade_amount = min(amount, order.amount)
+          trade_amount = min(amount, order.amount - order.executed)
           fee = round_up_to_18_decimal_places(order.amount * order.price * FEE)
           session.add(Trade(user=order.user, market=market, order_type=OrderType.SELL, amount=trade_amount, price=order.price, fee=fee))
           session.add(Trade(user=user, market=market, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=fee))
@@ -212,15 +213,15 @@ class Exchange:
           matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * order.price - FEE)
           user_asset_balance = self.get_balance(session, user, asset)
           user_asset_balance.amount += trade_amount
-          order.amount -= trade_amount
+          order.executed += trade_amount
           amount -= trade_amount
-          if order.amount == 0:
+          if order.executed == order.amount:
             session.delete(order)
           else:
             foundStoppingPoint = True
             break
       if amount > 0:
-        order = Order(user=user, market=market, order_type=OrderType.BUY, amount=amount, price=price)
+        order = Order(user=user, market=market, order_type=OrderType.BUY, amount=amount, executed=0, price=price)
         session.add(order)
         session.commit()
         return order.id
@@ -267,7 +268,7 @@ class Exchange:
           if order.price > price:
             foundStoppingPoint = True
             break
-          trade_amount = min(amount, order.amount)
+          trade_amount = min(amount, order.amount - order.executed)
           fee = round_up_to_18_decimal_places(order.amount * order.price * FEE)
           session.add(Trade(user=order.user, market=market, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=fee))
           session.add(Trade(user=user, market=market, order_type=OrderType.SELL, amount=trade_amount, price=order.price, fee=fee))
@@ -275,15 +276,15 @@ class Exchange:
           matching_user_currency_balance.amount += trade_amount
           user_asset_balance = self.get_balance(session, user, currency)
           user_asset_balance.amount += round_to_18_decimal_places(trade_amount * order.price - fee)
-          order.amount -= trade_amount
+          order.executed += trade_amount
           amount -= trade_amount
-          if order.amount == 0:
+          if order.executed == order.amount:
             session.delete(order)
           else:
             foundStoppingPoint = True
             break
       if amount > 0:
-        order = Order(user=user, market=market, order_type=OrderType.SELL, amount=amount, price=price)
+        order = Order(user=user, market=market, order_type=OrderType.SELL, amount=amount, executed=0, price=price)
         session.add(order)
         session.commit()
         return order.id
