@@ -66,9 +66,9 @@ class Exchange:
       except:
         return {'error': 'api_key not found'}
       try:
-        [asset] = session.query(Asset).where(Asset.name == asset_name)
+        [asset] = session.query(Asset).where(Asset.name == asset_name.upper())
       except:
-        return {'error': 'asset not found'}
+        return {'error': 'currency not found'}
       try:
         [deposit_address] = session.query(DepositAddress).where((DepositAddress.user == user) & (DepositAddress.asset == asset))
       except:
@@ -88,9 +88,9 @@ class Exchange:
       except:
         return {'error': 'api_key not found'}
       try:
-        [asset] = session.query(Asset).where(Asset.name == asset_name)
+        [asset] = session.query(Asset).where(Asset.name == asset_name.upper())
       except:
-        return {'error': 'asset not found'}
+        return {'error': 'currency not found'}
       if not is_valid(amount) or amount != assets[asset.name].round_down(amount):
         return {'error': 'Invalid amount'}
       if amount < assets[asset.name].minimum_withdrawal():
@@ -114,14 +114,14 @@ class Exchange:
         return {'error': 'api_key not found'}
       if asset_name is None:
         return [{
-          'asset': asset.name,
+          'currency': asset.name,
           'amount': self.get_balance(session, user, asset).amount
           } for asset in session.query(Asset).all()]
       else:
         try:
           [asset] = session.query(Asset).where(Asset.name == asset_name)
         except:
-          return {'error': 'asset not found'}
+          return {'error': 'currency not found'}
         balance = self.get_balance(session, user, asset)
         return {'balance': balance.amount}
 
@@ -165,7 +165,7 @@ class Exchange:
       [currency] = session.query(Asset).where(Asset.name == 'BTC')
       balance = self.get_balance(session, user, currency)
       if round_up_to_18_decimal_places(amount * price) > balance.amount:
-        return {'error':'Insufficient funds'}
+        return {'error':'Insufficient BTC'}
       balance.amount -= round_up_to_18_decimal_places(amount * price)
       foundStoppingPoint = False
       while not foundStoppingPoint:
@@ -213,11 +213,11 @@ class Exchange:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
         return {'error': 'api_key not found'}
-      [asset] = session.query(Asset).where(Asset.name == asset_name)
-      [currency] = session.query(Asset).where(Asset.name == currency_name)
+      [asset] = session.query(Asset).where(Asset.name == 'XMR')
+      [currency] = session.query(Asset).where(Asset.name == 'BTC')
       balance = self.get_balance(session, user, asset)
       if amount > balance.amount:
-        return {'error': 'Insufficient assets'}
+        return {'error': 'Insufficient XMR'}
       balance.amount -= amount
       foundStoppingPoint = False
       while not foundStoppingPoint:

@@ -42,10 +42,10 @@ def new_user():
   rate_limit(ip=True)
   return exchange.new_user()
 
-@app.route('/balance')
-def balance():
+@app.route('/balances')
+def balances():
   rate_limit()
-  return exchange.balance(request.args['api_key'], request.args.get('asset'))
+  return exchange.balance(request.args['api_key'])
 
 @app.route('/orders')
 def orders():
@@ -60,7 +60,7 @@ def trades():
 @app.route('/deposit')
 def deposit():
   rate_limit()
-  return exchange.deposit(request.args['api_key'], request.args['asset'])
+  return exchange.deposit(request.args['api_key'], request.args['currency'])
 
 @app.route('/withdraw')
 def withdraw():
@@ -69,7 +69,7 @@ def withdraw():
     amount = Decimal(request['amount'])
   except:
     return 'Invalid amount'
-  return exchange.withdraw(request.args['api_key'], request.args['asset'], request.args['address'], amount)
+  return exchange.withdraw(request.args['api_key'], request.args['currency'], request.args['address'], amount)
 
 @app.route('/buy')
 def buy():
@@ -82,7 +82,7 @@ def buy():
     price = Decimal(request['price'])
   except:
     return 'Invalid price'
-  return exchange.buy(request.args['api_key'], request.args['asset'], request.args['currency'], amount, price)
+  return exchange.buy(request.args['api_key'], amount, price)
 
 @app.route('/sell')
 def sell():
@@ -95,7 +95,7 @@ def sell():
     price = Decimal(request['price'])
   except:
     return 'Invalid price'
-  return exchange.sell(request.args['api_key'], request.args['asset'], request.args['currency'], amount, price)
+  return exchange.sell(request.args['api_key'], amount, price)
 
 @app.route('/cancel')
 def cancel():
