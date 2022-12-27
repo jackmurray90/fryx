@@ -105,13 +105,13 @@ class Exchange:
       if amount < assets[asset.name].minimum_withdrawal():
         return 'amount too small'
       balance = self.get_balance(session, user, asset)
-      if balance.amount < amount:
+      if balance.amount < amount + assets[asset.name].withdrawal_fee():
         return 'Not enough funds'
       try:
         assets[asset.name].withdraw(address, amount)
       except:
         return 'Invalid address'
-      balance.amount -= amount
+      balance.amount -= amount + assets[asset.name].withdrawal_fee()
       session.commit()
       return 'Success'
 

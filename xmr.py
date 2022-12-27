@@ -49,3 +49,6 @@ class XMR:
 
   def round_down(self, amount):
     return floor(amount * 10**12) / Decimal(10**12)
+
+  def withdrawal_fee(self):
+    return Decimal('0.0001')

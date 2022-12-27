@@ -58,3 +58,6 @@ class BTC:
 
   def round_down(self, amount):
     return floor(amount * 10**8) / Decimal(10**8)
+
+  def withdrawal_fee(self):
+    return Decimal('0.0001')
