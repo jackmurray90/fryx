@@ -1,7 +1,7 @@
 from flask import Flask, request, abort, render_template
-from exchange import Exchange
+from exchange import Exchange, hash_api_key
 from decimal import Decimal
-from db import RateLimit
+from db import RateLimit, User
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from env import DB
@@ -15,12 +15,20 @@ engine = create_engine(DB)
 def api():
   return render_template('api.html')
 
-def rate_limit():
+def rate_limit(ip=False):
   with Session(engine) as session:
+    if ip:
+      address = request.remote_addr
+    else:
+      try:
+        [user] = session.query(User).where(User.api_key == hash_api_key(request.args['api_key']))
+        address = request.args['api_key']
+      except:
+        abort(403)
     try:
-      [rate_limit] = session.query(RateLimit).where(RateLimit.address == request.remote_addr)
+      [rate_limit] = session.query(RateLimit).where(RateLimit.address == address)
     except:
-      rate_limit = RateLimit(address=request.remote_addr, timestamp=0)
+      rate_limit = RateLimit(address=address, timestamp=0)
       session.add(rate_limit)
       session.commit()
     if rate_limit.timestamp + 1 > time():
@@ -30,12 +38,12 @@ def rate_limit():
 
 @app.route('/new_user')
 def new_user():
-  rate_limit()
+  rate_limit(ip=True)
   return exchange.new_user()
 
 @app.route('/markets')
 def markets():
-  rate_limit()
+  rate_limit(ip=True)
   return exchange.markets()
 
 @app.route('/balance')
