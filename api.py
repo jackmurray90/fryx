@@ -16,6 +16,10 @@ def api():
   with Session(engine) as session:
     return render_template('api.html', total_users=session.query(User).count())
 
+@app.route('/robots.txt')
+def robots():
+  return render_template('robots.txt')
+
 def rate_limit(ip=False):
   with Session(engine) as session:
     if ip:
