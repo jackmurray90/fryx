@@ -6,29 +6,28 @@
 </style>
 <title>Trade API</title>
 <h1>Trade API</h1>
-<p>Trade API is an <a href="https://github.com/jackmurray90/tradeapi">open source</a> cryptocurrency exchange written by a team consisting of an AI and a <a href="https://murray.software/">human</a>.</p>
+<p>Trade API is an <a href="https://github.com/jackmurray90/tradeapi">open source</a> XMR/BTC exchange.</p>
 <p>So far this host has {{ total_users }} registered users.</p>
 <p>Requests are rate-limited at one request per second per user.</p>
 <p>There are no trading fees.</p>
 <h2>API Documentation</h2>
 <table>
   <tr><th>Endpoint</th><th>URL Parameters</th><th>Description</th><th>Example Response</th></tr>
-  <tr><th>/new_user</th><td>None</td><td>Generates a new API key.</td><td>iQtxykjG48y3F9A93jRPqC</td></tr>
-  <tr><th>/markets</th><td>None</td><td>Get a list of accepted markets.</td><td>[{"asset":"XMR", "currency":"BTC"}]</tr>
+  <tr><th>/new_user</th><td>None</td><td>Generates a new API key.</td><td>{"api_key": "iQtxykjG48y3F9A93jRPqC"}</td></tr>
   <tr><th>/balance</th><td><ul><li>api_key</li><li>asset (optional)</li></ul></td><td>Gets the balance of <u>asset</u>, or for all assets if <u>asset</u> is not provided.</td>
     <td>[{"amount":"0E-18","asset":"XMR"}, {"amount":"0E-18","asset":"BTC"}]</td></tr>
   <tr><th>/orders</th><td><ul><li>api_key</li></ul></td><td>Gets a list of your open orders.</td>
     <td>[{"amount":"0.010000000000000000", "asset":"XMR", "currency":"BTC", "executed": "0.000000000000000000", "id":1, "price":"0.010000000000000000", "type":"BUY"}]</td></tr>
   <tr><th>/trades</th><td><ul><li>api_key</li></ul></td><td>Gets a list of the trades you have made.</td>
     <td>[{"amount":"0.010000000000000000", "asset":"XMR", "currency":"BTC", "fee":"1.000000000E-9", "price":"0.010000000000000000", "type":"BUY"}]</td></tr>
-  <tr><th>/deposit</th><td><ul><li>api_key</li><li>asset</li></ul></td><td>Gets a deposit address for <u>asset</u>.</td><td>bc1qh5jnz3tjtvththmd0sjru5sq97p8e9qj9mm794</td></tr>
+  <tr><th>/deposit</th><td><ul><li>api_key</li><li>asset</li></ul></td><td>Gets a deposit address for <u>asset</u>.</td><td>{"address": "bc1qh5jnz3tjtvththmd0sjru5sq97p8e9qj9mm794"}</td></tr>
   <tr><th>/withdraw</th><td><ul><li>api_key</li><li>asset</li><li>amount</li></ul></td>
-    <td>Withdraws <u>amount</u> of <u>asset</u> to <u>address</u>.<br/>Remember to leave enough for withdrawal fees in your account.</td><td>Success</td></tr>
+    <td>Withdraws <u>amount</u> of <u>asset</u> to <u>address</u>.<br/>Remember to leave enough for withdrawal fees in your account.</td><td>{"success": true}</td></tr>
   <tr><th>/buy</th><td><ul><li>api_key</li><li>asset</li><li>currency</li><li>amount</li><li>price</li></ul></td>
-    <td>Creates a buy order to buy <u>amount</u> of <u>asset</u> paying with <u>currency</u> at <u>price</u> or below. Returns the <u>order_id</u>.</td><td>1</td></tr>
+    <td>Creates a buy order to buy <u>amount</u> of <u>asset</u> paying with <u>currency</u> at <u>price</u> or below. Returns the <u>order_id</u>.</td><td>{"order_id": 1}</td></tr>
   <tr><th>/sell</th><td><ul><li>api_key</li><li>asset</li><li>currency</li><li>amount</li><li>price</li></ul></td>
-    <td>Creates a sell order to sell <u>amount</u> of <u>asset</u> accepting <u>currency</u> at <u>price</u> or above. Returns the <u>order_id</u>.</td><td>2</td></tr>
-  <tr><th>/cancel</th><td><ul><li>api_key</li><li>order_id</li></td><td>Cancels an order.</td><td>Success</td></tr>
+    <td>Creates a sell order to sell <u>amount</u> of <u>asset</u> accepting <u>currency</u> at <u>price</u> or above. Returns the <u>order_id</u>.</td><td>{"order_id": 2}</td></tr>
+  <tr><th>/cancel</th><td><ul><li>api_key</li><li>order_id</li></td><td>Cancels an order.</td><td>{"success": true}</td></tr>
 </table>
 <h2>Fees</h2>
 <table>

@@ -1,4 +1,4 @@
-from db import Asset, DepositAddress, User, Balance, Order, Market, OrderType, Trade
+from db import Asset, DepositAddress, User, Balance, Order, OrderType, Trade
 from assets import assets
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -19,8 +19,6 @@ def round_up_to_18_decimal_places(amount):
 def is_valid(amount):
   return amount > 0 and not amount.is_nan() and round_to_18_decimal_places(amount) == amount
 
-FEE = Decimal('0.001')
-
 class Exchange:
   def __init__(self, db):
     self.engine = create_engine(db)
@@ -34,13 +32,6 @@ class Exchange:
         return False
 
   # API Methods
-
-  def markets(self):
-    with Session(self.engine) as session:
-      return [{
-        'asset': market.asset.name,
-        'currency': market.currency.name
-       } for market in session.query(Market)]
 
   def get_balance(self, session, user, asset):
     try:
@@ -66,7 +57,7 @@ class Exchange:
     with Session(self.engine) as session:
       session.add(user)
       session.commit()
-      return api_key
+      return {'api_key': api_key}
 
   def deposit(self, api_key, asset_name):
     with Session(self.engine) as session:
@@ -142,8 +133,6 @@ class Exchange:
         return {'error': 'api_key not found'}
       return [{
           'id': order.id,
-          'asset': order.market.asset.name,
-          'currency': order.market.currency.name,
           'type': 'BUY' if order.order_type == OrderType.BUY else 'SELL',
           'amount': order.amount,
           'executed': order.executed,
@@ -157,15 +146,12 @@ class Exchange:
       except:
         return {'error': 'api_key not found'}
       return [{
-          'asset': trade.market.asset.name,
-          'currency': trade.market.currency.name,
           'type': 'BUY' if trade.order_type == OrderType.BUY else 'SELL',
           'amount': trade.amount,
-          'price': trade.price,
-          'fee': trade.fee
+          'price': trade.price
         } for trade in user.trades]
 
-  def buy(self, api_key, asset_name, currency_name, amount, price):
+  def buy(self, api_key, amount, price):
     if not is_valid(amount):
       return {'error': 'Invalid amount'}
     if not is_valid(price):
@@ -175,18 +161,8 @@ class Exchange:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
         return {'error': 'api_key not found'}
-      try:
-        [asset] = session.query(Asset).where(Asset.name == asset_name)
-      except:
-        return {'error': 'asset not found'}
-      try:
-        [currency] = session.query(Asset).where(Asset.name == currency_name)
-      except:
-        return {'error': 'currency not found'}
-      try:
-        [market] = session.query(Market).where((Market.asset == asset) & (Market.currency == currency))
-      except:
-        return {'error': 'Market not found'}
+      [asset] = session.query(Asset).where(Asset.name == 'XMR')
+      [currency] = session.query(Asset).where(Asset.name == 'BTC')
       balance = self.get_balance(session, user, currency)
       if round_up_to_18_decimal_places(amount * price) > balance.amount:
         return {'error':'Insufficient funds'}
@@ -194,7 +170,7 @@ class Exchange:
       foundStoppingPoint = False
       while not foundStoppingPoint:
         orders = session.query(Order).where(
-            (Order.market == market) & (Order.order_type == OrderType.BUY)
+            Order.order_type == OrderType.BUY
           ).order_by(
             Order.price.asc(),
             Order.id.asc()
@@ -206,11 +182,10 @@ class Exchange:
             foundStoppingPoint = True
             break
           trade_amount = min(amount, order.amount - order.executed)
-          fee = round_up_to_18_decimal_places(order.amount * order.price * FEE)
-          session.add(Trade(user=order.user, market=market, order_type=OrderType.SELL, amount=trade_amount, price=order.price, fee=fee))
-          session.add(Trade(user=user, market=market, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=fee))
+          session.add(Trade(user=order.user, order_type=OrderType.SELL, amount=trade_amount, price=order.price))
+          session.add(Trade(user=user, order_type=OrderType.BUY, amount=trade_amount, price=order.price))
           matching_user_currency_balance = self.get_balance(session, order.user, currency)
-          matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * order.price - FEE)
+          matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * order.price)
           user_asset_balance = self.get_balance(session, user, asset)
           user_asset_balance.amount += trade_amount
           order.executed += trade_amount
@@ -221,14 +196,14 @@ class Exchange:
             foundStoppingPoint = True
             break
       if amount > 0:
-        order = Order(user=user, market=market, order_type=OrderType.BUY, amount=amount, executed=0, price=price)
+        order = Order(user=user, order_type=OrderType.BUY, amount=amount, executed=0, price=price)
         session.add(order)
         session.commit()
         return {'order_id': order.id}
       session.commit()
       return {'success': True}
 
-  def sell(self, api_key, asset_name, currency_name, amount, price):
+  def sell(self, api_key, amount, price):
     if not is_valid(amount):
       return {'error': 'Invalid amount'}
     if not is_valid(price):
@@ -238,18 +213,8 @@ class Exchange:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
         return {'error': 'api_key not found'}
-      try:
-        [asset] = session.query(Asset).where(Asset.name == asset_name)
-      except:
-        return {'error': 'asset not found'}
-      try:
-        [currency] = session.query(Asset).where(Asset.name == currency_name)
-      except:
-        return {'error': 'currency not found'}
-      try:
-        [market] = session.query(Market).where((Market.asset == asset) & (Market.currency == currency))
-      except:
-        return {'error': 'Market not found'}
+      [asset] = session.query(Asset).where(Asset.name == asset_name)
+      [currency] = session.query(Asset).where(Asset.name == currency_name)
       balance = self.get_balance(session, user, asset)
       if amount > balance.amount:
         return {'error': 'Insufficient assets'}
@@ -257,7 +222,7 @@ class Exchange:
       foundStoppingPoint = False
       while not foundStoppingPoint:
         orders = session.query(Order).where(
-            (Order.market == market) & (Order.order_type == OrderType.BUY)
+            Order.order_type == OrderType.BUY
           ).order_by(
             Order.price.desc(),
             Order.id.asc()
@@ -269,13 +234,12 @@ class Exchange:
             foundStoppingPoint = True
             break
           trade_amount = min(amount, order.amount - order.executed)
-          fee = round_up_to_18_decimal_places(order.amount * order.price * FEE)
-          session.add(Trade(user=order.user, market=market, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=fee))
-          session.add(Trade(user=user, market=market, order_type=OrderType.SELL, amount=trade_amount, price=order.price, fee=fee))
+          session.add(Trade(user=order.user, order_type=OrderType.BUY, amount=trade_amount, price=order.price))
+          session.add(Trade(user=user, order_type=OrderType.SELL, amount=trade_amount, price=order.price))
           matching_user_currency_balance = self.get_balance(session, order.user, asset)
           matching_user_currency_balance.amount += trade_amount
           user_asset_balance = self.get_balance(session, user, currency)
-          user_asset_balance.amount += round_to_18_decimal_places(trade_amount * order.price - fee)
+          user_asset_balance.amount += round_to_18_decimal_places(trade_amount * order.price)
           order.executed += trade_amount
           amount -= trade_amount
           if order.executed == order.amount:
@@ -284,7 +248,7 @@ class Exchange:
             foundStoppingPoint = True
             break
       if amount > 0:
-        order = Order(user=user, market=market, order_type=OrderType.SELL, amount=amount, executed=0, price=price)
+        order = Order(user=user, order_type=OrderType.SELL, amount=amount, executed=0, price=price)
         session.add(order)
         session.commit()
         return {'order_id': order.id}

@@ -42,11 +42,6 @@ def new_user():
   rate_limit(ip=True)
   return exchange.new_user()
 
-@app.route('/markets')
-def markets():
-  rate_limit(ip=True)
-  return exchange.markets()
-
 @app.route('/balance')
 def balance():
   rate_limit()
