@@ -73,11 +73,11 @@ class Exchange:
       try:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
-        return 'api_key not found'
+        return {'error': 'api_key not found'}
       try:
         [asset] = session.query(Asset).where(Asset.name == asset_name)
       except:
-        return 'asset not found'
+        return {'error': 'asset not found'}
       try:
         [deposit_address] = session.query(DepositAddress).where((DepositAddress.user == user) & (DepositAddress.asset == asset))
       except:
@@ -88,39 +88,39 @@ class Exchange:
           )
         session.add(deposit_address)
         session.commit()
-      return deposit_address.address
+      return {'address': deposit_address.address}
 
   def withdraw(self, api_key, asset_name, address, amount):
     with Session(self.engine) as session:
       try:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
-        return 'api_key not found'
+        return {'error': 'api_key not found'}
       try:
         [asset] = session.query(Asset).where(Asset.name == asset_name)
       except:
-        return 'asset not found'
+        return {'error': 'asset not found'}
       if not is_valid(amount) or amount != assets[asset.name].round_down(amount):
-        return 'Invalid amount'
+        return {'error': 'Invalid amount'}
       if amount < assets[asset.name].minimum_withdrawal():
-        return 'amount too small'
+        return {'error': 'amount too small'}
       balance = self.get_balance(session, user, asset)
-      if balance.amount < amount + assets[asset.name].withdrawal_fee():
-        return 'Not enough funds'
+      if balance.amount < amount:
+        return {'error': 'Not enough funds'}
       try:
         assets[asset.name].withdraw(address, amount)
       except:
-        return 'Invalid address'
-      balance.amount -= amount + assets[asset.name].withdrawal_fee()
+        return {'error': 'Invalid address'}
+      balance.amount -= amount
       session.commit()
-      return 'Success'
+      return {'success': True}
 
   def balance(self, api_key, asset_name):
     with Session(self.engine) as session:
       try:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
-        return 'api_key not found'
+        return {'error': 'api_key not found'}
       if asset_name is None:
         return [{
           'asset': asset.name,
@@ -130,16 +130,16 @@ class Exchange:
         try:
           [asset] = session.query(Asset).where(Asset.name == asset_name)
         except:
-          return 'asset not found'
+          return {'error': 'asset not found'}
         balance = self.get_balance(session, user, asset)
-        return balance.amount
+        return {'balance': balance.amount}
 
   def orders(self, api_key):
     with Session(self.engine) as session:
       try:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
-        return 'api_key not found'
+        return {'error': 'api_key not found'}
       return [{
           'id': order.id,
           'asset': order.market.asset.name,
@@ -155,7 +155,7 @@ class Exchange:
       try:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
-        return 'api_key not found'
+        return {'error': 'api_key not found'}
       return [{
           'asset': trade.market.asset.name,
           'currency': trade.market.currency.name,
@@ -167,29 +167,29 @@ class Exchange:
 
   def buy(self, api_key, asset_name, currency_name, amount, price):
     if not is_valid(amount):
-      return 'Invalid amount'
+      return {'error': 'Invalid amount'}
     if not is_valid(price):
-      return 'Invalid price'
+      return {'error': 'Invalid price'}
     with Session(self.engine) as session:
       try:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
-        return 'api_key not found'
+        return {'error': 'api_key not found'}
       try:
         [asset] = session.query(Asset).where(Asset.name == asset_name)
       except:
-        return 'asset not found'
+        return {'error': 'asset not found'}
       try:
         [currency] = session.query(Asset).where(Asset.name == currency_name)
       except:
-        return 'currency not found'
+        return {'error': 'currency not found'}
       try:
         [market] = session.query(Market).where((Market.asset == asset) & (Market.currency == currency))
       except:
-        return 'Market not found'
+        return {'error': 'Market not found'}
       balance = self.get_balance(session, user, currency)
       if round_up_to_18_decimal_places(amount * price) > balance.amount:
-        return 'Insufficient funds'
+        return {'error':'Insufficient funds'}
       balance.amount -= round_up_to_18_decimal_places(amount * price)
       foundStoppingPoint = False
       while not foundStoppingPoint:
@@ -224,35 +224,35 @@ class Exchange:
         order = Order(user=user, market=market, order_type=OrderType.BUY, amount=amount, executed=0, price=price)
         session.add(order)
         session.commit()
-        return order.id
+        return {'order_id': order.id}
       session.commit()
-      return 'Success'
+      return {'success': True}
 
   def sell(self, api_key, asset_name, currency_name, amount, price):
     if not is_valid(amount):
-      return 'Invalid amount'
+      return {'error': 'Invalid amount'}
     if not is_valid(price):
-      return 'Invalid price'
+      return {'error': 'Invalid price'}
     with Session(self.engine) as session:
       try:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
-        return 'api_key not found'
+        return {'error': 'api_key not found'}
       try:
         [asset] = session.query(Asset).where(Asset.name == asset_name)
       except:
-        return 'asset not found'
+        return {'error': 'asset not found'}
       try:
         [currency] = session.query(Asset).where(Asset.name == currency_name)
       except:
-        return 'currency not found'
+        return {'error': 'currency not found'}
       try:
         [market] = session.query(Market).where((Market.asset == asset) & (Market.currency == currency))
       except:
-        return 'Market not found'
+        return {'error': 'Market not found'}
       balance = self.get_balance(session, user, asset)
       if amount > balance.amount:
-        return 'Insufficient assets'
+        return {'error': 'Insufficient assets'}
       balance.amount -= amount
       foundStoppingPoint = False
       while not foundStoppingPoint:
@@ -287,20 +287,20 @@ class Exchange:
         order = Order(user=user, market=market, order_type=OrderType.SELL, amount=amount, executed=0, price=price)
         session.add(order)
         session.commit()
-        return order.id
+        return {'order_id': order.id}
       session.commit()
-      return 'Success'
+      return {'success': True}
 
   def cancel(api_key, order_id):
     with Session(self.engine) as session:
       try:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
-        return 'api_key not found'
+        return {'error':'api_key not found'}
       try:
         [order] = session.query(Order).where((Order.id == order_id) & (Order.user == user))
       except:
-        return 'Order not found'
+        return {'error': 'Order not found'}
       session.delete(order)
       session.commit()
-      return 'Success'
+      return {'success': True}

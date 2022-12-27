@@ -16,10 +16,6 @@ def api():
   with Session(engine) as session:
     return render_template('api.html', total_users=session.query(User).count())
 
-@app.route('/robots.txt')
-def robots():
-  return render_template('robots.txt')
-
 def rate_limit(ip=False):
   with Session(engine) as session:
     if ip:
@@ -54,10 +50,7 @@ def markets():
 @app.route('/balance')
 def balance():
   rate_limit()
-  bal = exchange.balance(request.args['api_key'], request.args.get('asset'))
-  if isinstance(bal, Decimal):
-    return '%0.18f' % bal
-  return bal
+  return exchange.balance(request.args['api_key'], request.args.get('asset'))
 
 @app.route('/orders')
 def orders():
