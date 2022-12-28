@@ -19,7 +19,7 @@ class BTC:
   def get_incoming_txs(self, height):
     while True:
       try:
-        rpc = AuthServiceProxy(BITCOI)
+        rpc = AuthServiceProxy(BITCOIN)
         txs = rpc.listsinceblock(rpc.getblockhash(height-1))
         incoming_txs = []
         for tx in txs['transactions']:
@@ -32,7 +32,7 @@ class BTC:
   def withdraw(self, address, amount):
     while True:
       try:
-        rpc = AuthServiceProxy(BITCOI)
+        rpc = AuthServiceProxy(BITCOIN)
         rpc.send({address: amount})
       except CannotSendRequest:
         sleep(1)
@@ -40,7 +40,7 @@ class BTC:
   def get_new_deposit_address(self):
     while True:
       try:
-        rpc = AuthServiceProxy(BITCOI)
+        rpc = AuthServiceProxy(BITCOIN)
         return rpc.getnewaddress()
       except CannotSendRequest:
         sleep(1)
