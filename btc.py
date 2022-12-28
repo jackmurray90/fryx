@@ -7,19 +7,11 @@ from http.client import CannotSendRequest
 
 MINCONF = 2
 
-def connect():
-  rpc = AuthServiceProxy(BITCOIN)
-  try:
-    rpc.loadwallet('tradeapi')
-  except JSONRPCException:
-    pass
-  return rpc
-
 class BTC:
   def height(self):
     while True:
       try:
-        rpc = connect()
+        rpc = AuthServiceProxy(BITCOIN)
         return rpc.getblockcount() - MINCONF
       except CannotSendRequest:
         sleep(1)
@@ -27,7 +19,7 @@ class BTC:
   def get_incoming_txs(self, height):
     while True:
       try:
-        rpc = connect()
+        rpc = AuthServiceProxy(BITCOI)
         txs = rpc.listsinceblock(rpc.getblockhash(height-1))
         incoming_txs = []
         for tx in txs['transactions']:
@@ -40,7 +32,7 @@ class BTC:
   def withdraw(self, address, amount):
     while True:
       try:
-        rpc = connect()
+        rpc = AuthServiceProxy(BITCOI)
         rpc.send({address: amount})
       except CannotSendRequest:
         sleep(1)
@@ -48,7 +40,7 @@ class BTC:
   def get_new_deposit_address(self):
     while True:
       try:
-        rpc = connect()
+        rpc = AuthServiceProxy(BITCOI)
         return rpc.getnewaddress()
       except CannotSendRequest:
         sleep(1)
