@@ -283,6 +283,7 @@ class Exchange:
       try:
         auto_order = AutoOrder(id=self.random_128_bit_string(), order_type=order_type, withdrawal_address=address)
         session.add(auto_order)
+        session.commit()
         return auto_order.id
       except Exception as e:
         print(e)
