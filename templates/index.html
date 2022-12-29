@@ -6,8 +6,9 @@
   <p>That address has been used on this site before. Please use a new address.</p>
 {% endif %}
 <form action="/auto/buy" method="post">
-  Your Monero address: <input name="monero_address"/> <input type="Submit" value="Buy Monero"/>
+  <input name="monero_address" size="100" placeholder="Your Monero address"/> <input type="Submit" value="Buy Monero"/>
 </form>
+<br/>
 <form action="/auto/sell" method="post">
-  Your Bitcoin address: <input name="bitcoin_address"/> <input type="Submit" value="Sell Monero"/>
+  <input name="bitcoin_address" size="100" placeholder="Your Bitcoin address"/> <input type="Submit" value="Sell Monero"/>
 </form>

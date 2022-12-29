@@ -264,7 +264,7 @@ class Exchange:
       session.commit()
       return {'success': True}
 
-  def cancel(api_key, order_id):
+  def cancel(self, api_key, order_id):
     with Session(self.engine) as session:
       try:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
@@ -278,19 +278,19 @@ class Exchange:
       session.commit()
       return {'success': True}
 
-    def auto(order_type, address):
-      with Session(self.engine) as session:
-        try:
-          auto_order = AutoOrder(id=self.random_128_bit_string(), order_type=order_type, withdrawal_address=address)
-          session.add(auto_order)
-          return auto_order.id
-        except:
-          return None
+  def auto(self, order_type, address):
+    with Session(self.engine) as session:
+      try:
+        auto_order = AutoOrder(id=self.random_128_bit_string(), order_type=order_type, withdrawal_address=address)
+        session.add(auto_order)
+        return auto_order.id
+      except:
+        return None
 
-    def get_auto(id):
-      with Session(self.engine) as session:
-        try:
-          [auto] = session.query(AutoOrder).where(AutoOrder.id == id)
-        except:
-          return None
-        return auto.deposit_address
+  def get_auto(self, id):
+    with Session(self.engine) as session:
+      try:
+        [auto] = session.query(AutoOrder).where(AutoOrder.id == id)
+      except:
+        return None
+      return auto.deposit_address
