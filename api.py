@@ -38,7 +38,6 @@ def auto_sell():
 
 @app.get('/auto/<id>')
 def auto(id):
-  rate_limit(ip=True)
   auto = exchange.get_auto(id)
   if not auto:
     abort(404)
