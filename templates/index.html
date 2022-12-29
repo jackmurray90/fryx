@@ -1,0 +1,14 @@
+<!doctype html>
+<title>Trade API</title>
+<h1>Trade API</h1>
+<p>Trade API is an <a href="https://github.com/jackmurray90/tradeapi">open source</a> XMR/BTC exchange.</p>
+<p><a href="/api">API Documentation</a> for market makers.</p>
+{% if failed %}
+  <p>That address has been used on this site before. Please use a new address.</p>
+{% endif %}
+<form action="/auto/buy" method="post">
+  Your Monero address: <input name="monero_address"/> <input type="Submit" value="Buy Monero"/>
+</form>
+<form action="/auto/sell" method="post">
+  Your Bitcoin address: <input name="bitcoin_address"/> <input type="Submit" value="Sell Monero"/>
+</form>

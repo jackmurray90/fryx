@@ -1,7 +1,7 @@
 from flask import Flask, request, abort, render_template
 from exchange import Exchange, hash_api_key
 from decimal import Decimal
-from db import RateLimit, User
+from db import RateLimit, User, OrderType
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from env import DB
@@ -12,30 +12,37 @@ exchange = Exchange(DB)
 engine = create_engine(DB)
 
 @app.route('/')
-def api():
+def index():
   with Session(engine) as session:
-    return render_template('api.html', total_users=session.query(User).count())
+    return render_template('index.html', failed='failed' in request.args)
 
-def rate_limit(ip=False):
-  with Session(engine) as session:
-    if ip:
-      address = request.remote_addr
-    else:
-      try:
-        [user] = session.query(User).where(User.api_key == hash_api_key(request.args['api_key']))
-        address = request.args['api_key']
-      except:
-        abort(403)
-    try:
-      [rate_limit] = session.query(RateLimit).where(RateLimit.address == address)
-    except:
-      rate_limit = RateLimit(address=address, timestamp=0)
-      session.add(rate_limit)
-      session.commit()
-    if rate_limit.timestamp + 1 > time():
-      abort(429)
-    rate_limit.timestamp = time()
-    session.commit()
+@app.route('/api')
+def api():
+  return render_template('api.html')
+
+@app.post('/auto/buy')
+def auto_buy():
+  rate_limit(ip=True)
+  auto = exchange.auto_order(OrderType.BUY, request.form['monero_address'])
+  if not auto:
+    redirect('/?failed')
+  return redirect('/auto/%s' % auto)
+
+@app.post('/auto/sell')
+def auto_sell():
+  rate_limit(ip=True)
+  auto = exchange.auto_order(OrderType.SELL, request.form['bitcoin_address'])
+  if not auto:
+    redirect('/?failed')
+  return redirect('/auto/%s' % auto)
+
+@app.get('/auto/<id>')
+def auto(id):
+  rate_limit(ip=True)
+  auto = exchange.get_auto(id)
+  if not auto:
+    abort(404)
+  return render_template('auto.html', address=auto)
 
 @app.route('/new_user')
 def new_user():
@@ -101,3 +108,24 @@ def sell():
 def cancel():
   rate_limit()
   return exchange.cancel(request.args['api_key'], request.args['order_id'])
+
+def rate_limit(ip=False):
+  with Session(engine) as session:
+    if ip:
+      address = request.remote_addr
+    else:
+      try:
+        [user] = session.query(User).where(User.api_key == hash_api_key(request.args['api_key']))
+        address = request.args['api_key']
+      except:
+        abort(403)
+    try:
+      [rate_limit] = session.query(RateLimit).where(RateLimit.address == address)
+    except:
+      rate_limit = RateLimit(address=address, timestamp=0)
+      session.add(rate_limit)
+      session.commit()
+    if rate_limit.timestamp + 1 > time():
+      abort(429)
+    rate_limit.timestamp = time()
+    session.commit()

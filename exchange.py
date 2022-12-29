@@ -31,6 +31,18 @@ class Exchange:
       except:
         return False
 
+  def random_128_bit_string(self):
+    num = randbits(128)
+    arr = []
+    arr_append = arr.append
+    _divmod = divmod
+    ALPHABET = "23456789abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
+    base = len(ALPHABET)
+    while num:
+      num, rem = _divmod(num, base)
+      arr_append(ALPHABET[rem])
+    return ''.join(arr)
+
   # API Methods
 
   def get_balance(self, session, user, asset):
@@ -43,16 +55,7 @@ class Exchange:
     return balance
 
   def new_user(self):
-    num = randbits(128)
-    arr = []
-    arr_append = arr.append
-    _divmod = divmod
-    ALPHABET = "23456789abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
-    base = len(ALPHABET)
-    while num:
-      num, rem = _divmod(num, base)
-      arr_append(ALPHABET[rem])
-    api_key = ''.join(arr)
+    api_key = self.random_128_bit_string()
     user = User(api_key=hash_api_key(api_key))
     with Session(self.engine) as session:
       session.add(user)
@@ -195,6 +198,9 @@ class Exchange:
           else:
             foundStoppingPoint = True
             break
+          if amount == 0:
+            foundStoppingPoint = True
+            break
       if amount > 0:
         order = Order(user=user, order_type=OrderType.BUY, amount=amount, executed=0, price=price)
         session.add(order)
@@ -247,6 +253,9 @@ class Exchange:
           else:
             foundStoppingPoint = True
             break
+          if amount == 0:
+            foundStopppingPoint = True
+            break
       if amount > 0:
         order = Order(user=user, order_type=OrderType.SELL, amount=amount, executed=0, price=price)
         session.add(order)
@@ -268,3 +277,20 @@ class Exchange:
       session.delete(order)
       session.commit()
       return {'success': True}
+
+    def auto(order_type, address):
+      with Session(self.engine) as session:
+        try:
+          auto_order = AutoOrder(id=self.random_128_bit_string(), order_type=order_type, withdrawal_address=address)
+          session.add(auto_order)
+          return auto_order.id
+        except:
+          return None
+
+    def get_auto(id):
+      with Session(self.engine) as session:
+        try:
+          [auto] = session.query(AutoOrder).where(AutoOrder.id == id)
+        except:
+          return None
+        return auto.deposit_address

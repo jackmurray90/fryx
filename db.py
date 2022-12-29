@@ -81,3 +81,11 @@ class RateLimit(Base):
 
   address = Column(String, primary_key=True)
   timestamp = Column(Numeric(17, 5))
+
+class AutoOrder(Base):
+  __tablename__ = 'autos'
+
+  id = Column(String, primary_key=True)
+  order_type = Column(Enum(OrderType))
+  deposit_address = Column(String, unique=True)
+  withdrawal_address = Column(String, unique=True)
