@@ -33,7 +33,7 @@ def auto_sell():
   rate_limit(ip=True)
   auto = exchange.auto(OrderType.SELL, request.form['bitcoin_address'])
   if not auto:
-    redirect('/?failed')
+    return redirect('/?failed')
   return redirect('/auto/%s' % auto)
 
 @app.get('/auto/<id>')
