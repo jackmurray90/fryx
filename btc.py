@@ -13,7 +13,7 @@ class BTC:
       try:
         rpc = AuthServiceProxy(BITCOIN)
         return rpc.getblockcount() - MINCONF
-      except CannotSendRequest:
+      except:
         sleep(1)
 
   def get_incoming_txs(self, height):
@@ -26,7 +26,7 @@ class BTC:
           if tx['category'] == 'receive' and tx['blockheight'] == height:
             incoming_txs.append((tx['address'], tx['amount']))
         return incoming_txs
-      except CannotSendRequest:
+      except:
         sleep(1)
 
   def withdraw(self, address, amount):
@@ -42,7 +42,7 @@ class BTC:
       try:
         rpc = AuthServiceProxy(BITCOIN)
         return rpc.getnewaddress()
-      except CannotSendRequest:
+      except:
         sleep(1)
 
   def minimum_withdrawal(self):
