@@ -278,11 +278,11 @@ class Exchange:
       session.commit()
       return {'success': True}
 
-  def auto(self, order_type, address):
+  def auto(self, order_type, address, refund_address):
     with Session(self.engine) as session:
       try:
         deposit_address = assets['BTC' if order_type == OrderType.SELL else 'XMR'].get_new_deposit_address()
-        auto_order = AutoOrder(id=self.random_128_bit_string(), order_type=order_type, withdrawal_address=address, deposit_address=deposit_address)
+        auto_order = AutoOrder(id=self.random_128_bit_string(), order_type=order_type, withdrawal_address=address, deposit_address=deposit_address, refund_address=refund_address)
         session.add(auto_order)
         session.commit()
         return auto_order.id

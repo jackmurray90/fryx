@@ -89,3 +89,4 @@ class AutoOrder(Base):
   order_type = Column(Enum(OrderType))
   deposit_address = Column(String, unique=True)
   withdrawal_address = Column(String, unique=True)
+  refund_address = Column(String)

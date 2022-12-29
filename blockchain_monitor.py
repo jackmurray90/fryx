@@ -83,6 +83,11 @@ class BlockchainMonitor:
       asset.withdraw(auto.withdrawal_address, withdrawal_amount)
     except:
       pass
+    if amount > 0:
+      try:
+        other_asset.withdraw(auto.refund_address, amount)
+      except:
+        pass
 
 blockchain_monitor = BlockchainMonitor()
 
