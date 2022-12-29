@@ -281,12 +281,12 @@ class Exchange:
   def auto(self, order_type, address):
     with Session(self.engine) as session:
       try:
-        auto_order = AutoOrder(id=self.random_128_bit_string(), order_type=order_type, withdrawal_address=address)
+        deposit_address = assets['BTC' if order_type == OrderType.SELL else 'XMR'].get_new_deposit_address()
+        auto_order = AutoOrder(id=self.random_128_bit_string(), order_type=order_type, withdrawal_address=address, deposit_address=deposit_address)
         session.add(auto_order)
         session.commit()
         return auto_order.id
-      except Exception as e:
-        print(e)
+      except:
         return None
 
   def get_auto(self, id):
