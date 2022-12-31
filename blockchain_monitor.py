@@ -27,6 +27,7 @@ class BlockchainMonitor:
       [asset] = session.query(Asset).where(Asset.name == asset_name)
       while self.running:
         while asset.height < assets[asset.name].height():
+          print("Proccesing block height", asset.height, "for asset", asset_name)
           for address, amount in assets[asset.name].get_incoming_txs(asset.height):
             try:
               [auto] = session.query(AutoOrder).where(AutoOrder.deposit_address == address)
