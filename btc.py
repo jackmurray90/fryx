@@ -5,7 +5,7 @@ from env import BITCOIN
 from time import sleep
 from http.client import CannotSendRequest
 
-MINCONF = 2
+MINCONF = 6
 
 class BTC:
   def height(self):

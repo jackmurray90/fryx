@@ -3,7 +3,7 @@ from monero.wallet import Wallet
 from env import MONERO_RPC_PASSWORD
 from time import sleep
 
-MINCONF = 15
+MINCONF = 30
 
 def connect():
   return Wallet(JSONRPCWallet(host='10.128.0.4', user='tradeapi', password=MONERO_RPC_PASSWORD))
