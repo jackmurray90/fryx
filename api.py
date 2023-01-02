@@ -23,7 +23,7 @@ def api():
 @app.post('/auto/buy')
 def auto_buy():
   rate_limit(ip=True)
-  auto = exchange.auto(OrderType.BUY, request.form['monero_address'])
+  auto = exchange.auto(OrderType.BUY, request.form['monero_address'], request.form['bitcoin_address'])
   if not auto:
     redirect('/?failed')
   return redirect('/auto/%s' % auto)
@@ -31,7 +31,7 @@ def auto_buy():
 @app.post('/auto/sell')
 def auto_sell():
   rate_limit(ip=True)
-  auto = exchange.auto(OrderType.SELL, request.form['bitcoin_address'])
+  auto = exchange.auto(OrderType.SELL, request.form['bitcoin_address'], request.form['monero_address'])
   if not auto:
     return redirect('/?failed')
   return redirect('/auto/%s' % auto)
