@@ -1,46 +1,58 @@
-from monero.backends.jsonrpc import JSONRPCWallet
-from monero.wallet import Wallet
-from env import MONERO_RPC_PASSWORD
+from monerorpc.authproxy import AuthServiceProxy, JSONRPCException
+from env import MONERO
 from time import sleep
 
 MINCONF = 30
-
-def connect():
-  return Wallet(JSONRPCWallet(host=MONERO_RPC_HOST, user=MONERO_RPC_USERNAME, password=MONERO_RPC_PASSWORD))
 
 class XMR:
   def height(self):
     while True:
       try:
-        wallet = connect()
-        return wallet.height() - MINCONF
+        rpc = AuthServiceProxy(MONERO)
+        return wallet.get_height() - MINCONF
       except:
         sleep(1)
 
   def get_incoming_txs(self, height):
     while True:
       try:
-        wallet = connect()
-        txs = wallet.incoming(min_height=height, max_height=height)
-        return [(tx.local_address, tx.amount) for tx in txs]
+        rpc = AuthServiceProxy(MONERO)
+        txs = rpc.get_transfers({
+          'in':True,
+          'filter_by_height': True,
+          'min_height': height-1,
+          'max_height': height
+          }).get('in', [])
+        return [(tx['address'], tx['amount']) for tx in txs if tx['height'] == height]
       except:
         sleep(1)
 
   def withdraw(self, address, amount):
     while True:
       try:
-        wallet = connect()
-        wallet.transfer(address, amount)
-      except ValueError:
-        raise ValueError
+        rpc = AuthServiceProxy(MONERO)
+        rpc.transfer({
+          'destinations': [{
+            'amount': int(amount * 10**12),
+            'address': address
+            }]
+          })
       except:
         sleep(1)
 
   def get_new_deposit_address(self):
     while True:
       try:
-        wallet = connect()
-        return wallet.new_address()[0]
+        rpc = AuthServiceProxy(MONERO)
+        return rpc.create_address({'account_index': 0})['address']
+      except:
+        sleep(1)
+
+  def validate_address(self, address):
+    while True:
+      try:
+        rpc = AuthServiceProxy(MONERO)
+        return rpc.validate_address({'address': address})['valid']
       except:
         sleep(1)
 

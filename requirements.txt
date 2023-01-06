@@ -2,4 +2,4 @@ flask
 sqlalchemy
 psycopg2
 python-bitcoinrpc
-monero
+python-monerorpc
