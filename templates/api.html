@@ -4,6 +4,7 @@
   table { border-collapse: collapse; margin: 1em auto; }
   th, td { border: 1px solid #ccc; padding: 0.5em; }
   ul, li { margin: 0; padding: 0; list-style: none; }
+  pre { text-align: left; }
 </style>
 <title>Fryx Finance</title>
 <h1><a href="/"><img src="/fryx.finance.png" width="512px"/></a></h1>
@@ -13,22 +14,39 @@
 <h2>API Documentation</h2>
 <table>
   <tr><th>Endpoint</th><th>URL Parameters</th><th>Description</th><th>Example Response</th></tr>
-  <tr><th>/new_user</th><td>None</td><td>Generates a new API key.</td><td>{"api_key": "iQtxykjG48y3F9A93jRPqC"}</td></tr>
-  <tr><th>/order_book</th><td>None</td><td>Gets the order book.</td><td>[{"amount":"0.010000000000000000", "executed": "0.000000000000000000", "price":"0.010000000000000000", "type":"buy"}]</td></tr>
+  <tr><th>/new_user</th><td>None</td><td>Generates a new API key.</td><td><pre>{"api_key": "iQtxykjG48y3F9A93jRPqC"}</pre></td></tr>
+  <tr><th>/order_book</th><td>None</td><td>Gets the order book.</td><td>
+<pre>[{
+  "amount":"0.010000000000000000",
+  "executed": "0.000000000000000000",
+  "price":"0.010000000000000000",
+  "type":"buy"
+}]</pre></td></tr>
   <tr><th>/balances</th><td><ul><li>api_key</li></ul></td><td>Gets the balances for both XMR and BTC.</td>
-    <td>{"XMR": "0E-18", "BTC": "0E-18"}</td></tr>
+    <td><pre>{"XMR":"0E-18","BTC":"0E-18"}</pre></td></tr>
   <tr><th>/orders</th><td><ul><li>api_key</li></ul></td><td>Gets a list of your open orders.</td>
-    <td>[{"amount":"0.010000000000000000", "executed": "0.000000000000000000", "id":1, "price":"0.010000000000000000", "type":"buy"}]</td></tr>
+    <td>
+<pre>[{
+  "amount":"0.010000000000000000",
+  "executed": "0.000000000000000000",
+  "id":1, "price":"0.010000000000000000",
+  "type":"buy"
+}]</pre></td></tr>
   <tr><th>/trades</th><td><ul><li>api_key</li></ul></td><td>Gets a list of the trades you have made.</td>
-    <td>[{"amount":"0.010000000000000000", "price":"0.010000000000000000", "type":"buy"}]</td></tr>
-  <tr><th>/deposit</th><td><ul><li>api_key</li><li>currency</li></ul></td><td>Gets a deposit address for <u>currency</u>.</td><td>{"address": "bc1qh5jnz3tjtvththmd0sjru5sq97p8e9qj9mm794"}</td></tr>
+    <td>
+<pre>[{
+  "amount":"0.010000000000000000",
+  "price":"0.010000000000000000",
+  "type":"buy"
+}]</pre></td></tr>
+  <tr><th>/deposit</th><td><ul><li>api_key</li><li>currency</li></ul></td><td>Gets a deposit address for <u>currency</u>.</td><td><pre>{"address": "bc1qh5jnz3tjtvththmd0sjru5sq97p8e9qj9mm794"}</pre></td></tr>
   <tr><th>/withdraw</th><td><ul><li>api_key</li><li>currency</li><li>amount</li></ul></td>
-    <td>Withdraws <u>amount</u> of <u>currency</u> to <u>address</u>.<br/>Remember to leave enough for withdrawal fees in your account.</td><td>{"success": true}</td></tr>
+    <td>Withdraws <u>amount</u> of <u>currency</u> to <u>address</u>.<br/>Remember to leave enough for withdrawal fees in your account.</td><td><pre>{"success": true}</pre></td></tr>
   <tr><th>/buy</th><td><ul><li>api_key</li><li>amount</li><li>price</li></ul></td>
-    <td>Creates a buy order to buy <u>amount</u> of XMR at <u>price</u> or below.<br/>Returns the <u>order_id</u>.</td><td>{"order_id": 1}</td></tr>
+    <td>Creates a buy order to buy <u>amount</u> of XMR at <u>price</u> or below.<br/>Returns the <u>order_id</u>.</td><td><pre>{"order_id": 1}</pre></td></tr>
   <tr><th>/sell</th><td><ul><li>api_key</li><li>amount</li><li>price</li></ul></td>
-    <td>Creates a sell order to sell <u>amount</u> of XMR at <u>price</u> or above.<br/>Returns the <u>order_id</u>.</td><td>{"order_id": 2}</td></tr>
-  <tr><th>/cancel</th><td><ul><li>api_key</li><li>order_id</li></td><td>Cancels an order.</td><td>{"success": true}</td></tr>
+    <td>Creates a sell order to sell <u>amount</u> of XMR at <u>price</u> or above.<br/>Returns the <u>order_id</u>.</td><td><pre>{"order_id": 2}</pre></td></tr>
+  <tr><th>/cancel</th><td><ul><li>api_key</li><li>order_id</li></td><td>Cancels an order.</td><td><pre>{"success": true}</pre></td></tr>
 </table>
 <h2>Withdrawal Fees</h2>
 <table>
