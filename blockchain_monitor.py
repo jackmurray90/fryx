@@ -32,6 +32,7 @@ class BlockchainMonitor:
             try:
               [auto] = session.query(AutoOrder).where(AutoOrder.deposit_address == address)
               self.execute_trade(auto, amount)
+              continue
             except:
               pass
             try:
@@ -39,9 +40,8 @@ class BlockchainMonitor:
               try:
                 [balance] = session.query(Balance).where((Balance.user == deposit_address.user) & (Balance.asset == asset))
               except:
-                balance = Balance(user=deposit_address.user, asset=asset, amount=0)
+                balance = Balance(user_id=deposit_address.user_id, asset_id=asset.id, amount=0)
                 session.add(balance)
-                session.commit()
               balance.amount += amount
               session.commit()
             except:
@@ -80,10 +80,11 @@ class BlockchainMonitor:
           break
     asset = assets['BTC' if order_type == Order.SELL else 'XMR']
     withdrawal_amount -= asset.withdrawal_fee()
-    try:
-      asset.withdraw(auto.withdrawal_address, withdrawal_amount)
-    except:
-      pass
+    if withdrawal_amount > 0:
+      try:
+        asset.withdraw(auto.withdrawal_address, withdrawal_amount)
+      except:
+        pass
     if amount > 0:
       try:
         other_asset.withdraw(auto.refund_address, amount)

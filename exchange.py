@@ -49,7 +49,7 @@ class Exchange:
     try:
       [balance] = session.query(Balance).where((Balance.user == user) & (Balance.asset == asset))
     except:
-      balance = Balance(user=user, asset=asset, amount=0)
+      balance = Balance(user_id=user.id, asset_id=asset.id, amount=0)
       session.add(balance)
       session.commit()
     return balance
@@ -71,13 +71,13 @@ class Exchange:
       try:
         [asset] = session.query(Asset).where(Asset.name == asset_name.upper())
       except:
-        return {'error': 'currency not found'}
+        return {'error': 'Currency not found'}
       try:
         [deposit_address] = session.query(DepositAddress).where((DepositAddress.user == user) & (DepositAddress.asset == asset))
       except:
         deposit_address = DepositAddress(
-            user=user,
-            asset=asset,
+            user_id=user.id,
+            asset_id=asset.id,
             address=assets[asset.name].get_new_deposit_address()
           )
         session.add(deposit_address)
@@ -93,40 +93,28 @@ class Exchange:
       try:
         [asset] = session.query(Asset).where(Asset.name == asset_name.upper())
       except:
-        return {'error': 'currency not found'}
+        return {'error': 'Currency not found'}
       if not is_valid(amount) or amount != assets[asset.name].round_down(amount):
         return {'error': 'Invalid amount'}
       if amount < assets[asset.name].minimum_withdrawal():
-        return {'error': 'amount too small'}
-      balance = self.get_balance(session, user, asset)
-      if balance.amount < amount:
-        return {'error': 'Not enough funds'}
-      try:
-        assets[asset.name].withdraw(address, amount)
-      except:
+        return {'error': 'Amount too small'}
+      if not assets[asset.name].validate_address(address):
         return {'error': 'Invalid address'}
-      balance.amount -= amount
+      balance = self.get_balance(session, user, asset)
+      if balance.amount < amount + assets[asset.name].withdrawal_fee():
+        return {'error': 'Not enough funds'}
+      assets[asset.name].withdraw(address, amount)
+      balance.amount -= amount + assets[asset.name].withdrawal_fee()
       session.commit()
       return {'success': True}
 
-  def balance(self, api_key, asset_name):
+  def balances(self, api_key):
     with Session(self.engine) as session:
       try:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
         return {'error': 'api_key not found'}
-      if asset_name is None:
-        return [{
-          'currency': asset.name,
-          'amount': self.get_balance(session, user, asset).amount
-          } for asset in session.query(Asset).all()]
-      else:
-        try:
-          [asset] = session.query(Asset).where(Asset.name == asset_name)
-        except:
-          return {'error': 'currency not found'}
-        balance = self.get_balance(session, user, asset)
-        return {'balance': balance.amount}
+      return dict([(asset.name, self.get_balance(session, user, asset).amount) for asset in session.query(Asset).all()])
 
   def orders(self, api_key):
     with Session(self.engine) as session:
@@ -185,8 +173,8 @@ class Exchange:
             foundStoppingPoint = True
             break
           trade_amount = min(amount, order.amount - order.executed)
-          session.add(Trade(user=order.user, order_type=OrderType.SELL, amount=trade_amount, price=order.price))
-          session.add(Trade(user=user, order_type=OrderType.BUY, amount=trade_amount, price=order.price))
+          session.add(Trade(user_id=order.user_id, order_type=OrderType.SELL, amount=trade_amount, price=order.price))
+          session.add(Trade(user_id=user.id, order_type=OrderType.BUY, amount=trade_amount, price=order.price))
           matching_user_currency_balance = self.get_balance(session, order.user, currency)
           matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * order.price)
           user_asset_balance = self.get_balance(session, user, asset)
@@ -202,7 +190,7 @@ class Exchange:
             foundStoppingPoint = True
             break
       if amount > 0:
-        order = Order(user=user, order_type=OrderType.BUY, amount=amount, executed=0, price=price)
+        order = Order(user_id=user.id, order_type=OrderType.BUY, amount=amount, executed=0, price=price)
         session.add(order)
         session.commit()
         return {'order_id': order.id}
@@ -240,8 +228,8 @@ class Exchange:
             foundStoppingPoint = True
             break
           trade_amount = min(amount, order.amount - order.executed)
-          session.add(Trade(user=order.user, order_type=OrderType.BUY, amount=trade_amount, price=order.price))
-          session.add(Trade(user=user, order_type=OrderType.SELL, amount=trade_amount, price=order.price))
+          session.add(Trade(user_id=order.user_id, order_type=OrderType.BUY, amount=trade_amount, price=order.price))
+          session.add(Trade(user_id=user.id, order_type=OrderType.SELL, amount=trade_amount, price=order.price))
           matching_user_currency_balance = self.get_balance(session, order.user, asset)
           matching_user_currency_balance.amount += trade_amount
           user_asset_balance = self.get_balance(session, user, currency)
@@ -257,7 +245,7 @@ class Exchange:
             foundStopppingPoint = True
             break
       if amount > 0:
-        order = Order(user=user, order_type=OrderType.SELL, amount=amount, executed=0, price=price)
+        order = Order(user_id=user.id, order_type=OrderType.SELL, amount=amount, executed=0, price=price)
         session.add(order)
         session.commit()
         return {'order_id': order.id}
@@ -281,7 +269,7 @@ class Exchange:
   def auto(self, order_type, address, refund_address):
     with Session(self.engine) as session:
       try:
-        deposit_address = assets['BTC' if order_type == OrderType.SELL else 'XMR'].get_new_deposit_address()
+        deposit_address = assets['XMR' if order_type == OrderType.SELL else 'BTC'].get_new_deposit_address()
         auto_order = AutoOrder(id=self.random_128_bit_string(), order_type=order_type, withdrawal_address=address, deposit_address=deposit_address, refund_address=refund_address)
         session.add(auto_order)
         session.commit()

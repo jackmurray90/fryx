@@ -70,7 +70,7 @@ def new_user():
 @app.route('/balances')
 def balances():
   rate_limit()
-  return exchange.balance(request.args['api_key'])
+  return exchange.balances(request.args['api_key'])
 
 @app.route('/orders')
 def orders():
