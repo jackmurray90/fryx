@@ -48,6 +48,14 @@ class BTC:
         print(e)
         sleep(1)
 
+  def validate_address(self, address):
+    while True:
+      try:
+        rpc = AuthServiceProxy(BITCOIN)
+        return rpc.validateaddress(address)['isvalid']
+      except:
+        sleep(1)
+
   def minimum_withdrawal(self):
     return Decimal('0.0001')
 
