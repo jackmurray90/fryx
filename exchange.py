@@ -159,6 +159,8 @@ class Exchange:
         return {'error':'Insufficient BTC'}
       balance.amount -= round_up_to_18_decimal_places(amount * price)
       foundStoppingPoint = False
+      session.begin_nested()
+      session.execute('LOCK TABLE orders IN ACCESS EXCLUSIVE MODE;')
       while not foundStoppingPoint:
         orders = session.query(Order).where(
             Order.order_type == OrderType.BUY
@@ -193,7 +195,9 @@ class Exchange:
         order = Order(user_id=user.id, order_type=OrderType.BUY, amount=amount, executed=0, price=price)
         session.add(order)
         session.commit()
+        session.commit()
         return {'order_id': order.id}
+      session.commit()
       session.commit()
       return {'success': True}
 
@@ -214,6 +218,8 @@ class Exchange:
         return {'error': 'Insufficient XMR'}
       balance.amount -= amount
       foundStoppingPoint = False
+      session.begin_nested()
+      session.execute('LOCK TABLE orders IN ACCESS EXCLUSIVE MODE;')
       while not foundStoppingPoint:
         orders = session.query(Order).where(
             Order.order_type == OrderType.BUY
@@ -248,7 +254,9 @@ class Exchange:
         order = Order(user_id=user.id, order_type=OrderType.SELL, amount=amount, executed=0, price=price)
         session.add(order)
         session.commit()
+        session.commit()
         return {'order_id': order.id}
+      session.commit()
       session.commit()
       return {'success': True}
 
