@@ -15,7 +15,7 @@
   <tr><th>Endpoint</th><th>URL Parameters</th><th>Description</th><th>Example Response</th></tr>
   <tr><th>/new_user</th><td>None</td><td>Generates a new API key.</td><td>{"api_key": "iQtxykjG48y3F9A93jRPqC"}</td></tr>
   <tr><th>/balances</th><td><ul><li>api_key</li></ul></td><td>Gets the balances for both XMR and BTC.</td>
-    <td>[{"amount":"0E-18","currency":"XMR"}, {"amount":"0E-18","currency":"BTC"}]</td></tr>
+    <td>{"XMR": "0E-18", "BTC": "0E-18"}</td></tr>
   <tr><th>/orders</th><td><ul><li>api_key</li></ul></td><td>Gets a list of your open orders.</td>
     <td>[{"amount":"0.010000000000000000", "executed": "0.000000000000000000", "id":1, "price":"0.010000000000000000", "type":"BUY"}]</td></tr>
   <tr><th>/trades</th><td><ul><li>api_key</li></ul></td><td>Gets a list of the trades you have made.</td>
