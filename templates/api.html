@@ -8,18 +8,19 @@
 <title>Fryx Finance</title>
 <h1><a href="/"><img src="/fryx.finance.png" width="512px"/></a></h1>
 <h2>API Documentation</h2>
-<p>Requests are rate-limited at one request per second per user.</p>
+<p>Requests are rate-limited at one request per 0.5 seconds.</p>
 <p>There are no trading fees.</p>
 <h2>API Documentation</h2>
 <table>
   <tr><th>Endpoint</th><th>URL Parameters</th><th>Description</th><th>Example Response</th></tr>
   <tr><th>/new_user</th><td>None</td><td>Generates a new API key.</td><td>{"api_key": "iQtxykjG48y3F9A93jRPqC"}</td></tr>
+  <tr><th>/order_book</th><td>None</td><td>Gets the order book.</td><td>[{"amount":"0.010000000000000000", "executed": "0.000000000000000000", "price":"0.010000000000000000", "type":"buy"}]</td></tr>
   <tr><th>/balances</th><td><ul><li>api_key</li></ul></td><td>Gets the balances for both XMR and BTC.</td>
     <td>{"XMR": "0E-18", "BTC": "0E-18"}</td></tr>
   <tr><th>/orders</th><td><ul><li>api_key</li></ul></td><td>Gets a list of your open orders.</td>
-    <td>[{"amount":"0.010000000000000000", "executed": "0.000000000000000000", "id":1, "price":"0.010000000000000000", "type":"BUY"}]</td></tr>
+    <td>[{"amount":"0.010000000000000000", "executed": "0.000000000000000000", "id":1, "price":"0.010000000000000000", "type":"buy"}]</td></tr>
   <tr><th>/trades</th><td><ul><li>api_key</li></ul></td><td>Gets a list of the trades you have made.</td>
-    <td>[{"amount":"0.010000000000000000", "price":"0.010000000000000000", "type":"BUY"}]</td></tr>
+    <td>[{"amount":"0.010000000000000000", "price":"0.010000000000000000", "type":"buy"}]</td></tr>
   <tr><th>/deposit</th><td><ul><li>api_key</li><li>currency</li></ul></td><td>Gets a deposit address for <u>currency</u>.</td><td>{"address": "bc1qh5jnz3tjtvththmd0sjru5sq97p8e9qj9mm794"}</td></tr>
   <tr><th>/withdraw</th><td><ul><li>api_key</li><li>currency</li><li>amount</li></ul></td>
     <td>Withdraws <u>amount</u> of <u>currency</u> to <u>address</u>.<br/>Remember to leave enough for withdrawal fees in your account.</td><td>{"success": true}</td></tr>

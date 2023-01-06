@@ -62,6 +62,11 @@ def auto(id):
     abort(404)
   return render_template('auto.html', address=auto)
 
+@app.route('/order_book')
+def order_book():
+  rate_limit(ip=True)
+  return exchange.order_book()
+
 @app.route('/new_user')
 def new_user():
   rate_limit(ip=True)
@@ -143,7 +148,7 @@ def rate_limit(ip=False):
       rate_limit = RateLimit(address=address, timestamp=0)
       session.add(rate_limit)
       session.commit()
-    if rate_limit.timestamp + 1 > time():
+    if rate_limit.timestamp + Decimal('0.5') > time():
       abort(429)
     rate_limit.timestamp = time()
     session.commit()

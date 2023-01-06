@@ -43,8 +43,6 @@ class Exchange:
       arr_append(ALPHABET[rem])
     return ''.join(arr)
 
-  # API Methods
-
   def get_balance(self, session, user, asset):
     try:
       [balance] = session.query(Balance).where((Balance.user == user) & (Balance.asset == asset))
@@ -53,6 +51,18 @@ class Exchange:
       session.add(balance)
       session.commit()
     return balance
+
+  # API Methods
+
+  def order_book(self):
+    with Session(self.engine) as session:
+      orders = session.query(Order).all()
+      return [{
+        'order_type': order.order_type,
+        'amount': order.amount,
+        'executed': order.executed,
+        'price': order.price
+        } for order in orders]
 
   def new_user(self):
     api_key = self.random_128_bit_string()
@@ -124,7 +134,7 @@ class Exchange:
         return {'error': 'api_key not found'}
       return [{
           'id': order.id,
-          'type': 'BUY' if order.order_type == OrderType.BUY else 'SELL',
+          'type': 'buy' if order.order_type == OrderType.BUY else 'sell',
           'amount': order.amount,
           'executed': order.executed,
           'price': order.price
@@ -137,7 +147,7 @@ class Exchange:
       except:
         return {'error': 'api_key not found'}
       return [{
-          'type': 'BUY' if trade.order_type == OrderType.BUY else 'SELL',
+          'type': 'buy' if trade.order_type == OrderType.BUY else 'sell',
           'amount': trade.amount,
           'price': trade.price
         } for trade in user.trades]
