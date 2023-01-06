@@ -1,0 +1,21 @@
+<!doctype html>
+<style>
+  body { text-align: center; }
+  table { border-collapse: collapse; margin: 1em auto; }
+  th, td { border: 1px solid #ccc; padding: 0.5em; }
+</style>
+<title>Fryx Finance</title>
+<h1><img src="/fryx.finance.png" width="512px"/></h1>
+<p>In the event that we can't fulfil your entire order, we will send you a refund for the amount that was not exchanged.</p>
+<p>Refunds will be sent back to the bitcoin address that sent the deposit, so please ensure you send it from an address you control.</p>
+<p>The withdrawal fee for a refund is 0.0001 BTC.</p>
+{% if failed %}
+  <p>That address has been used on this site before. Please use a new address.</p>
+{% endif %}
+<form action="/auto/buy" method="post">
+  <table>
+    <tr><td><input name="monero_address" size="100" placeholder="Your Monero address"/></td></tr>
+    <tr><td><input name="bitcoin_address" size="100" placeholder="Your Refund Bitcoin address"/></td></tr>
+    <tr><td><input type="Submit" value="Buy Monero"/></td></tr>
+  </table>
+</form>

@@ -1,31 +1,8 @@
 <!doctype html>
 <style>
   body { text-align: center; }
-  table { border-collapse: collapse; margin: 1em auto; }
-  th, td { border: 1px solid #ccc; padding: 0.5em; }
 </style>
 <title>Fryx Finance</title>
 <h1><img src="/fryx.finance.png" width="512px"/></h1>
 <p>Welcome to Fryx Finance XMR/BTC <a href="https://github.com/jackmurray90/fryx-finance">open source</a> exchange. Here is the <a href="/api">API Documentation</a> for market makers.</p>
-<p>In the event that we can't fulfil your entire order, we will send you a refund for the amount that was not exchanged.</p>
-{% if failed %}
-  <p>That address has been used on this site before. Please use a new address.</p>
-{% endif %}
-<form action="/auto/buy" method="post">
-  <table>
-    <tr><td><input name="monero_address" size="100" placeholder="Your Monero address"/></td></tr>
-    <tr><td><input name="bitcoin_address" size="100" placeholder="Your Refund Bitcoin address"/></td></tr>
-    <tr><td><input type="Submit" value="Buy Monero"/></td></tr>
-  </table>
-</form>
-<form action="/auto/sell" method="post">
-  <table>
-    <tr><td><input name="bitcoin_address" size="100" placeholder="Your Bitcoin address"/></td></tr>
-    <tr><td><input name="monero_address" size="100" placeholder="Your Refund Monero address"/></td></tr>
-    <tr><td><input type="Submit" value="Sell Monero"/></td></tr>
-  </table>
-</form>
-<table>
-  <tr><th>BTC Withdrawal/Refund</th><td>0.0001 BTC</td></tr>
-  <tr><th>XMR Withdrawal/Refund</th><td>0.0001 XMR</td></tr>
-</table>
+<p>Click <a href="/auto/buy">here</a> to buy XMR, click <a href="/auto/sell">here</a> to sell XMR.</p>
