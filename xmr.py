@@ -9,8 +9,9 @@ class XMR:
     while True:
       try:
         rpc = AuthServiceProxy(MONERO)
-        return wallet.get_height() - MINCONF
-      except:
+        return rpc.get_height()['height'] - MINCONF
+      except Exception as e:
+        print(e)
         sleep(1)
 
   def get_incoming_txs(self, height):

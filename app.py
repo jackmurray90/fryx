@@ -20,20 +20,24 @@ def index():
 def api():
   return render_template('api.html')
 
-@app.post('/auto/buy')
+@app.route('/auto/buy', methods=['GET', 'POST'])
 def auto_buy():
   rate_limit(ip=True)
+  if not 'monero_address' in request.form:
+    return render_template('buy.html')
   auto = exchange.auto(OrderType.BUY, request.form['monero_address'], request.form['bitcoin_address'])
   if not auto:
-    redirect('/?failed')
+    redirect('/auto/buy?failed')
   return redirect('/auto/%s' % auto)
 
-@app.post('/auto/sell')
+@app.route('/auto/sell', methods=['GET', 'POST'])
 def auto_sell():
   rate_limit(ip=True)
+  if not 'bitcoin_address' in request.form:
+    return render_template('sell.html')
   auto = exchange.auto(OrderType.SELL, request.form['bitcoin_address'], request.form['monero_address'])
   if not auto:
-    return redirect('/?failed')
+    return redirect('/auto/sell?failed')
   return redirect('/auto/%s' % auto)
 
 @app.get('/auto/<id>')
