@@ -6,7 +6,7 @@ from time import sleep
 MINCONF = 30
 
 def connect():
-  return Wallet(JSONRPCWallet(host='10.128.0.4', user='tradeapi', password=MONERO_RPC_PASSWORD))
+  return Wallet(JSONRPCWallet(host=MONERO_RPC_HOST, user=MONERO_RPC_USERNAME, password=MONERO_RPC_PASSWORD))
 
 class XMR:
   def height(self):
