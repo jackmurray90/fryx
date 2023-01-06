@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from env import DB
 from time import time
+from assets import assets
 
 app = Flask(__name__)
 exchange = Exchange(DB)
@@ -14,7 +15,7 @@ engine = create_engine(DB)
 @app.route('/')
 def index():
   with Session(engine) as session:
-    return render_template('index.html', failed='failed' in request.args)
+    return render_template('index.html')
 
 @app.route('/api')
 def api():
@@ -22,22 +23,36 @@ def api():
 
 @app.route('/auto/buy', methods=['GET', 'POST'])
 def auto_buy():
-  rate_limit(ip=True)
   if not 'monero_address' in request.form:
     return render_template('buy.html')
+  errors = []
+  if not assets['BTC'].validate_address(request.form['bitcoin_address']):
+    errors.append('Invalid bitcoin address.')
+  if not assets['XMR'].validate_address(request.form['monero_address']):
+    errors.append('Invalid monero address.')
+  if errors:
+    return render_template('buy.html', errors=errors)
   auto = exchange.auto(OrderType.BUY, request.form['monero_address'], request.form['bitcoin_address'])
   if not auto:
-    redirect('/auto/buy?failed')
+    errors = ['One of your addresses has been used on this site before. Please use a new addresses.']
+    return render_template('buy.html', errors=errors)
   return redirect('/auto/%s' % auto)
 
 @app.route('/auto/sell', methods=['GET', 'POST'])
 def auto_sell():
-  rate_limit(ip=True)
   if not 'bitcoin_address' in request.form:
     return render_template('sell.html')
+  errors = []
+  if not assets['BTC'].validate_address(request.form['bitcoin_address']):
+    errors.append('Invalid bitcoin address.')
+  if not assets['XMR'].validate_address(request.form['monero_address']):
+    errors.append('Invalid monero address.')
+  if errors:
+    return render_template('sell.html', errors=errors)
   auto = exchange.auto(OrderType.SELL, request.form['bitcoin_address'], request.form['monero_address'])
   if not auto:
-    return redirect('/auto/sell?failed')
+    errors = ['One of your addresses has been used on this site before. Please use a new addresses.']
+    return render_template('buy.html', errors=errors)
   return redirect('/auto/%s' % auto)
 
 @app.get('/auto/<id>')
