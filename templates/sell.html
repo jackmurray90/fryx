@@ -2,8 +2,37 @@
 <style>
   body { text-align: center; }
 </style>
+<script src="/decimal.js"></script>
+<script>
+  async function calculate() {
+    let amount = new Decimal(document.getElementById("amount").value);
+    const response = await fetch("/order_book");
+    const order_book = await response.json();
+    order_book.buy.sort((a, b) => Decimal.sub(b.price, a.price).toNumber());
+    let approximate_value = new Decimal('0');
+    let amount_exchanged = new Decimal('0');
+    for (let i = 0; i < order_book.buy.length; i++) {
+      const amount_to_exchange = Decimal.min(Decimal.sub(order_book.amount, order_book.executed), amount);
+      const value = Decimal.mul(order_book.price, amount_to_exchange);
+      approximate_value = approximate_value.add(value);
+      amount_exchanged = amount_exchanged.add(amount_to_exchange);
+      amount = amount.sub(amount_to_exchange);
+      if (amount.eq(new Decimal(0))) {
+        break;
+      }
+    }
+    approximate_value = approximate_value.sub(new Decimal('0.0001'));
+    if (amount.eq(new Decimal(0))) {
+      document.getElementById('result').innerHTML = `This has value of approximately ${approximate_value.toFixed(8, Decimal.ROUND_UP)} BTC.`;
+    } else {
+      document.getElementById('result').innerHTML = `The exchange can only exchange ${amount_exchanged.toFixed(12, Decimal.ROUND_DOWN)} XMR at the moment. This has value of approximately ${approximate_value.toFixed(8, Decimal.ROUND_UP)} BTC.`;
+    }
+  }
+</script>
 <title>Fryx Finance</title>
 <h1><a href="/"><img src="/fryx.finance.png" width="512px"/></a></h1>
+<p>Enter the amount of XMR you want to sell: <input id="amount"/> <button onClick="calculate()">Calculate approximate value</button></p>
+<p id="result"></p>
 <p>In the event that we can't fulfil your entire order, we will send you a refund for the amount that was not exchanged.</p>
 <p>The withdrawal/refund fee is 0.0001 BTC and 0.0001 XMR.</p>
 {% for error in errors %}

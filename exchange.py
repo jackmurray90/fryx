@@ -57,12 +57,16 @@ class Exchange:
   def order_book(self):
     with Session(self.engine) as session:
       orders = session.query(Order).all()
-      return [{
-        'order_type': order.order_type,
-        'amount': order.amount,
-        'executed': order.executed,
-        'price': order.price
-        } for order in orders]
+      return {'buy': [{
+          'amount': order.amount,
+          'executed': order.executed,
+          'price': order.price
+          } for order in orders if order.order_type == OrderType.BUY],
+        'sell': [{
+          'amount': order.amount,
+          'executed': order.executed,
+          'price': order.price
+          } for order in orders if order.order_type == OrderType.SELL]}
 
   def new_user(self):
     api_key = self.random_128_bit_string()
