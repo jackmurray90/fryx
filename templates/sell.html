@@ -1,20 +1,16 @@
 <!doctype html>
 <style>
   body { text-align: center; }
-  table { border-collapse: collapse; margin: 1em auto; }
-  th, td { border: 1px solid #ccc; padding: 0.5em; }
 </style>
 <title>Fryx Finance</title>
 <h1><a href="/"><img src="/fryx.finance.png" width="512px"/></a></h1>
 <p>In the event that we can't fulfil your entire order, we will send you a refund for the amount that was not exchanged.</p>
-<p>The withdrawal fee for a refund is 0.0001 XMR.</p>
+<p>The withdrawal/refund fee is 0.0001 BTC and 0.0001 XMR.</p>
 {% if failed %}
   <p>That address has been used on this site before. Please use a new address.</p>
 {% endif %}
 <form action="/auto/sell" method="post">
-  <table>
-    <tr><td><input name="bitcoin_address" size="100" placeholder="Your Bitcoin address"/></td></tr>
-    <tr><td><input name="monero_address" size="100" placeholder="Your Refund Monero address"/></td></tr>
-    <tr><td><input type="Submit" value="Sell Monero"/></td></tr>
-  </table>
+  <p><input name="bitcoin_address" size="100" placeholder="Your Bitcoin address"/></p>
+  <p><input name="monero_address" size="100" placeholder="Your Refund Monero address"/></p>
+  <p><input type="Submit" value="Sell Monero"/></p>
 </form>
