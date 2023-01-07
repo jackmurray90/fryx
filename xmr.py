@@ -13,7 +13,6 @@ class XMR:
         rpc = AuthServiceProxy(MONERO)
         return rpc.get_height()['height'] - MINCONF
       except Exception as e:
-        print(e)
         sleep(1)
 
   def get_incoming_txs(self, height):

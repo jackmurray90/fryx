@@ -14,7 +14,6 @@ class BTC:
         rpc = AuthServiceProxy(BITCOIN)
         return rpc.getblockcount() - MINCONF
       except Exception as e:
-        print(e)
         sleep(1)
 
   def get_incoming_txs(self, height):
@@ -50,7 +49,6 @@ class BTC:
         rpc.send({address: amount})
         break
       except CannotSendRequest:
-        print("Cannot send request")
         sleep(1)
 
   def get_new_deposit_address(self):
@@ -59,7 +57,6 @@ class BTC:
         rpc = AuthServiceProxy(BITCOIN)
         return rpc.getnewaddress()
       except Exception as e:
-        print(e)
         sleep(1)
 
   def validate_address(self, address):
