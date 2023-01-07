@@ -56,14 +56,14 @@ def auto_sell():
   return redirect('/auto/sell/%s' % auto)
 
 @app.get('/auto/buy/<id>')
-def auto(id):
+def auto_buy_id(id):
   auto = exchange.get_auto(id)
   if not auto:
     abort(404)
   return render_template('auto_buy.html', address=auto)
 
 @app.get('/auto/sell/<id>')
-def auto(id):
+def auto_sell_id(id):
   auto = exchange.get_auto(id)
   if not auto:
     abort(404)
