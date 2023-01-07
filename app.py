@@ -112,11 +112,11 @@ def withdraw():
 def buy():
   rate_limit()
   try:
-    amount = Decimal(request['amount'])
+    amount = Decimal(request.args['amount'])
   except:
     return {'error': 'Invalid amount'}
   try:
-    price = Decimal(request['price'])
+    price = Decimal(request.args['price'])
   except:
     return {'error': 'Invalid price'}
   return exchange.buy(request.args['api_key'], amount, price)
@@ -125,11 +125,11 @@ def buy():
 def sell():
   rate_limit()
   try:
-    amount = Decimal(request['amount'])
+    amount = Decimal(request.args['amount'])
   except:
     return {'error': 'Invalid amount'}
   try:
-    price = Decimal(request['price'])
+    price = Decimal(request.args['price'])
   except:
     return {'error': 'Invalid price'}
   return exchange.sell(request.args['api_key'], amount, price)
