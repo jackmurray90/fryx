@@ -53,6 +53,7 @@ class BlockchainMonitor:
               except:
                 balance = Balance(user_id=deposit_address.user_id, asset_id=asset.id, amount=0)
                 session.add(balance)
+              print("Received a deposit of", amount, "to", address)
               balance.amount += amount
               session.commit()
             except:
