@@ -105,7 +105,7 @@ def withdraw():
   try:
     amount = Decimal(request['amount'])
   except:
-    return 'Invalid amount'
+    return {'error': 'Invalid amount'}
   return exchange.withdraw(request.args['api_key'], request.args['currency'], request.args['address'], amount)
 
 @app.route('/buy')
@@ -114,11 +114,11 @@ def buy():
   try:
     amount = Decimal(request['amount'])
   except:
-    return 'Invalid amount'
+    return {'error': 'Invalid amount'}
   try:
     price = Decimal(request['price'])
   except:
-    return 'Invalid price'
+    return {'error': 'Invalid price'}
   return exchange.buy(request.args['api_key'], amount, price)
 
 @app.route('/sell')
@@ -127,11 +127,11 @@ def sell():
   try:
     amount = Decimal(request['amount'])
   except:
-    return 'Invalid amount'
+    return {'error': 'Invalid amount'}
   try:
     price = Decimal(request['price'])
   except:
-    return 'Invalid price'
+    return {'error': 'Invalid price'}
   return exchange.sell(request.args['api_key'], amount, price)
 
 @app.route('/cancel')
