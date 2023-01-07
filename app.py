@@ -1,13 +1,14 @@
 from flask import Flask, request, abort, render_template, redirect
 from exchange import Exchange, hash_api_key
 from decimal import Decimal
-from db import RateLimit, User, OrderType
+from db import RateLimit, User, OrderType, Referrer
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from env import DB
 from time import time
 from assets import assets
 from math import floor
+import re
 
 app = Flask(__name__)
 exchange = Exchange(DB)
@@ -30,7 +31,18 @@ def format_decimal(d, decimal_places):
 
 @app.route('/')
 def index():
+  try:
+    referrer_hostname = re.match('https?://([^/]*)', request.referrer).group(1)()
+  except:
+    referrer_hostname = 'unknown'
   with Session(engine) as session:
+    try:
+      [ref] = session.query(Referrer).where(Referrer.hostname == referrer_hostname)
+      ref.count += 1
+      session.commit()
+    except:
+      session.add(Referrer(hostname=referrer_hostname), count=1)
+      session.commit()
     return render_template('index.html')
 
 @app.route('/api')

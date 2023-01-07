@@ -90,3 +90,9 @@ class AutoOrder(Base):
   deposit_address = Column(String, unique=True)
   withdrawal_address = Column(String, unique=True)
   refund_address = Column(String)
+
+class Referrer(Base):
+  __tablename__ = 'referrers'
+
+  hostname = Column(String, primary_key=True)
+  count = Column(Integer)
