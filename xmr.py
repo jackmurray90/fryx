@@ -1,6 +1,7 @@
 from monerorpc.authproxy import AuthServiceProxy, JSONRPCException
 from env import MONERO
 from time import sleep
+from decimal import Decimal
 
 MINCONF = 30
 
@@ -24,7 +25,7 @@ class XMR:
           'min_height': height-1,
           'max_height': height
           }).get('in', [])
-        return [(tx['address'], tx['amount']) for tx in txs if tx['height'] == height]
+        return [(tx['address'], Decimal(tx['amount'])/(10**12)) for tx in txs if tx['height'] == height]
       except:
         sleep(1)
 
