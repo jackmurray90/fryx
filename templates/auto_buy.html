@@ -4,6 +4,9 @@
 </style>
 <script src="/decimal.js"></script>
 <script>
+  function round_up_to_18_decimal_places(amount) {
+    return new Decimal(amount.toFixed(18, Decimal.ROUND_UP));
+  }
   async function calculate() {
     document.getElementById('result').innerHTML = 'Calculating...';
     let amount = null;
@@ -25,8 +28,8 @@
     let approximate_cost = new Decimal('0');
     let amount_exchanged = new Decimal('0');
     for (let i = 0; i < order_book.sell.length; i++) {
-      const amount_to_exchange = Decimal.min(Decimal.sub(order_book.amount, order_book.executed), amount);
-      const cost = Decimal.mul(order_book.price, amount_to_exchange);
+      const amount_to_exchange = Decimal.min(Decimal.sub(order_book.sell[i].amount, order_book.sell[i].executed), amount);
+      const cost = round_up_to_18_decimal_places(Decimal.mul(order_book.sell[i].price, amount_to_exchange));
       approximate_cost = approximate_cost.add(cost);
       amount_exchanged = amount_exchanged.add(amount_to_exchange);
       amount = amount.sub(amount_to_exchange);
