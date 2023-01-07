@@ -280,11 +280,22 @@ class Exchange:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
         return {'error':'api_key not found'}
+      session.begin_nested()
+      session.execute('LOCK TABLE orders IN ACCESS EXCLUSIVE MODE;')
       try:
         [order] = session.query(Order).where((Order.id == order_id) & (Order.user == user))
       except:
+        session.commit()
+        session.commit()
         return {'error': 'Order not found'}
+      [asset] = session.query(Asset).where(Asset.name == 'XMR' if order.order_type == OrderType.SELL else 'BTC')
+      balance = self.get_balance(session, order.user, asset)
+      if order.order_type == OrderType.SELL:
+        balance.amount += order.amount - order.executed
+      else:
+        balance.amount += round_to_18_decimal_places((order.amount - order.executed) * order.price)
       session.delete(order)
+      session.commit()
       session.commit()
       return {'success': True}
 
