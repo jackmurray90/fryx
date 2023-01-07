@@ -36,7 +36,7 @@ def auto_buy():
   if not auto:
     errors = ['One of your addresses has been used on this site before. Please use a new addresses.']
     return render_template('buy.html', errors=errors)
-  return redirect('/auto/%s' % auto)
+  return redirect('/auto/buy/%s' % auto)
 
 @app.route('/auto/sell', methods=['GET', 'POST'])
 def auto_sell():
@@ -53,14 +53,21 @@ def auto_sell():
   if not auto:
     errors = ['One of your addresses has been used on this site before. Please use a new addresses.']
     return render_template('buy.html', errors=errors)
-  return redirect('/auto/%s' % auto)
+  return redirect('/auto/sell/%s' % auto)
 
-@app.get('/auto/<id>')
+@app.get('/auto/buy/<id>')
 def auto(id):
   auto = exchange.get_auto(id)
   if not auto:
     abort(404)
-  return render_template('auto.html', address=auto)
+  return render_template('auto_buy.html', address=auto)
+
+@app.get('/auto/sell/<id>')
+def auto(id):
+  auto = exchange.get_auto(id)
+  if not auto:
+    abort(404)
+  return render_template('auto_sell.html', address=auto)
 
 @app.route('/order_book')
 def order_book():
