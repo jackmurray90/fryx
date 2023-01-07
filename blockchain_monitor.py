@@ -4,7 +4,7 @@ from db import Asset, Balance, DepositAddress, AutoOrder, Order, Trade, OrderTyp
 from sqlalchemy import create_engine
 from threading import Thread
 from time import sleep
-from exchange import round_to_18_decimal_places
+from exchange import round_to_18_decimal_places, round_up_to_18_decimal_places
 from env import DB
 
 class BlockchainMonitor:
@@ -88,19 +88,22 @@ class BlockchainMonitor:
         if orders == []:
           foundStoppingPoint = True
         for order in orders:
-          trade_amount = min(amount, order.amount - order.executed)
           if auto.order_type == OrderType.BUY:
+            trade_amount = min(round_to_18_decimal_places(amount/order.price), order.amount - order.executed)
             session.add(Trade(user_id=order.user_id, order_type=OrderType.SELL, amount=trade_amount, price=order.price))
             matching_user_currency_balance = self.get_balance(session, order.user, currency)
             matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * order.price)
             withdrawal_amount += trade_amount
+            amount -= round_up_to_18_decimal_places(trade_amount * order.price)
+            amount = max(0, amount)
           else:
+            trade_amount = min(amount, order.amount - order.executed)
             session.add(Trade(user_id=order.user_id, order_type=OrderType.BUY, amount=trade_amount, price=order.price))
             matching_user_currency_balance = self.get_balance(session, order.user, asset)
             matching_user_currency_balance.amount += trade_amount
             withdrawal_amount += round_to_18_decimal_places(trade_amount * order.price)
+            amount -= trade_amount
           order.executed += trade_amount
-          amount -= trade_amount
           if order.executed == order.amount:
             session.delete(order)
           else:
