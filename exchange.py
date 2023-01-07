@@ -288,7 +288,7 @@ class Exchange:
         session.commit()
         session.commit()
         return {'error': 'Order not found'}
-      [asset] = session.query(Asset).where(Asset.name == 'XMR' if order.order_type == OrderType.SELL else 'BTC')
+      [asset] = session.query(Asset).where(Asset.name == ('XMR' if order.order_type == OrderType.SELL else 'BTC'))
       balance = self.get_balance(session, order.user, asset)
       if order.order_type == OrderType.SELL:
         balance.amount += order.amount - order.executed
