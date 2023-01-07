@@ -38,8 +38,13 @@ class BlockchainMonitor:
             if auto:
               try:
                 self.execute_trade(auto, amount)
-              except Exception as e:
-                print(e)
+              except:
+                # This is a dirty hack to try it twice until we have some proper market makers and it's not just me.
+                sleep(10)
+                try:
+                  self.execute_trade(auto, amount)
+                except:
+                  pass
               continue
             try:
               [deposit_address] = session.query(DepositAddress).where(DepositAddress.address == address)
@@ -113,6 +118,9 @@ class BlockchainMonitor:
           asset.withdraw(auto.withdrawal_address, withdrawal_amount)
         except:
           pass
+      else:
+        # This is a dirty hack to try it twice until we have some proper market makers and it's not just me.
+        raise Exception
       if amount > 0:
         try:
           print("Refunding", amount, "to", auto.refund_address)
