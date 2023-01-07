@@ -57,5 +57,5 @@
 <p>Please allow 6 blocks confirmation time for Bitcoin.</p>
 <p>This page will automatically update with progress as your transaction is being processed.</p>
 {% for transaction in unconfirmed_transactions %}
-  <p>Receiving {{ '%0.8f'%transaction['amount'] }} BTC, {{ transaction['confirmations'] }} confirmations.</p>
+  <p>Receiving {{ transaction['amount']|format_decimal(8) }} BTC, {{ transaction['confirmations'] }} confirmations.</p>
 {% endfor %}

@@ -7,10 +7,26 @@ from sqlalchemy.orm import Session
 from env import DB
 from time import time
 from assets import assets
+from math import floor
 
 app = Flask(__name__)
 exchange = Exchange(DB)
 engine = create_engine(DB)
+
+@app.template_filter()
+def format_decimal(d, decimal_places):
+  digit = Decimal('10')
+  while digit <= d:
+    digit *= 10
+  result = ''
+  while decimal_places:
+    result += str(floor(d % digit * 10 / digit))
+    digit /= 10
+    if digit == 1:
+      result += '.' 
+    if digit < 1:
+      decimal_places -= 1
+  return result
 
 @app.route('/')
 def index():
