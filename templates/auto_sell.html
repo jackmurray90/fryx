@@ -3,8 +3,8 @@
   html { background-color: #000; color: #fff; }
   body { text-align: center; }
   input, button { background-color: #111; border: 1px solid #777; color: #fff; padding: 0.5em; }
-  .underline { text-decoration: underline; } 
   a, a:hover, a:visited { color: rgb(236, 103, 44); text-decoration: none; }
+  strong { padding: 0.5em; border: 1px solid rgb(236, 103, 44); }
   #nav a { padding: 0 2em; }
 </style>
 <meta http-equiv="refresh" content="60">
@@ -57,10 +57,10 @@
 <p>Enter the amount of XMR you want to sell: <input id="amount"/> <button onClick="calculate()">Calculate approximate value</button></p>
 <p id="result"></p>
 <p>In the event that we can't fulfil your entire order, we will send you a refund for the amount that was not exchanged.</p>
-<p>Your deposit address is: {{ address }}</p>
+<p>Your deposit address is: <strong>{{ address }}</strong></p>
 <p>As soon as we receive a deposit, we will exchange it and send the result to the address you provided.</p>
 <p>Please allow 25 blocks confirmation time for Monero.</p>
 <p>This page will automatically update listing unconfirmed transactions.</p>
 {% for transaction in unconfirmed_transactions %}
-  <p class='underline'>Receiving {{ transaction['amount']|format_decimal(12) }} XMR, {{ transaction['confirmations'] }} confirmations.</p>
+  <p><strong>Receiving {{ transaction['amount']|format_decimal(12) }} XMR, {{ transaction['confirmations'] }} confirmations.</strong></p>
 {% endfor %}
