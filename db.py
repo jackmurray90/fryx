@@ -69,6 +69,7 @@ class Trade(Base):
 
   id = Column(Integer, primary_key=True)
   user_id = Column(Integer, ForeignKey('users.id'))
+  timestamp = Column(Integer)
   order_type = Column(Enum(OrderType))
   amount = Column(Numeric(28, 18))
   price = Column(Numeric(28, 18))

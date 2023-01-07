@@ -1,4 +1,5 @@
 from db import Asset, DepositAddress, User, Balance, Order, OrderType, Trade, AutoOrder
+from time import time
 from assets import assets
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -191,8 +192,8 @@ class Exchange:
             foundStoppingPoint = True
             break
           trade_amount = min(amount, order.amount - order.executed)
-          session.add(Trade(user_id=order.user_id, order_type=OrderType.SELL, amount=trade_amount, price=order.price))
-          session.add(Trade(user_id=user.id, order_type=OrderType.BUY, amount=trade_amount, price=order.price))
+          session.add(Trade(user_id=order.user_id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, timestamp=int(time())))
+          session.add(Trade(user_id=user.id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, timestamp=int(time())))
           matching_user_currency_balance = self.get_balance(session, order.user, currency)
           matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * order.price)
           user_asset_balance = self.get_balance(session, user, asset)
@@ -252,8 +253,8 @@ class Exchange:
             foundStoppingPoint = True
             break
           trade_amount = min(amount, order.amount - order.executed)
-          session.add(Trade(user_id=order.user_id, order_type=OrderType.BUY, amount=trade_amount, price=order.price))
-          session.add(Trade(user_id=user.id, order_type=OrderType.SELL, amount=trade_amount, price=order.price))
+          session.add(Trade(user_id=order.user_id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, timestamp=int(time())))
+          session.add(Trade(user_id=user.id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, timestamp=int(time())))
           matching_user_currency_balance = self.get_balance(session, order.user, asset)
           matching_user_currency_balance.amount += trade_amount
           user_asset_balance = self.get_balance(session, user, currency)
