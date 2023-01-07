@@ -25,7 +25,7 @@ class XMR:
           'min_height': height-1,
           'max_height': height
           }).get('in', [])
-        return [(tx['address'], Decimal(tx['amount'])/(10**12)) for tx in txs if tx['height'] == height]
+        return [(tx['address'], Decimal(tx['amount'])/(10**12)) for tx in txs if tx['height'] == height and tx['locked'] == False]
       except:
         sleep(1)
 
