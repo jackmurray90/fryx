@@ -2,6 +2,7 @@
 <style>
   body { text-align: center; }
 </style>
+<meta http-equiv="refresh" content="60">
 <script src="/decimal.js"></script>
 <script>
   function round_to_18_decimal_places(amount) {
@@ -53,4 +54,7 @@
 <p>The withdrawal/refund fee is 0.0001 BTC and 0.0001 XMR.</p>
 <p>Your deposit address is: {{ address }}</p>
 <p>As soon as we receive a deposit, we will exchange it and send the result to the address you provided.</p>
-<p>Please allow 30 blocks confirmation time for Monero.</p>
+<p>Please allow 30 blocks confirmation time for Monero. This page will automatically update with progress as your transactions are being processed.</p>
+{% for transaction in unconfirmed_transactions %}
+  <p>Receiving {{ '%0.12f'%transaction['amount'] }} XMR, {{ transaction['confirmations'] }} confirmations.</p>
+{% endfor %}

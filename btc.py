@@ -24,11 +24,23 @@ class BTC:
         txs = rpc.listsinceblock(rpc.getblockhash(height-1))
         incoming_txs = []
         for tx in txs['transactions']:
-          if tx['category'] == 'receive' and tx['blockheight'] == height:
-            incoming_txs.append((tx['address'], tx['amount']))
+          if tx.get('category') == 'receive' and tx.get('blockheight') == height:
+            incoming_txs.append((tx.get('address'), tx.get('amount')))
         return incoming_txs
-      except Exception as e:
-        print(e)
+      except:
+        sleep(1)
+
+  def get_unconfirmed_transactions(self, address):
+    while True:
+      try:
+        rpc = AuthServiceProxy(BITCOIN)
+        txs = rpc.listsinceblock(rpc.getblockhash(self.height()))
+        incoming_txs = []
+        for tx in txs['transactions']:
+          if tx.get('category') == 'receive' and tx.get('address') == address:
+            incoming_txs.append({'amount': tx.get('amount'), 'confirmations': tx.get('confirmations') or 0})
+        return incoming_txs
+      except:
         sleep(1)
 
   def withdraw(self, address, amount):

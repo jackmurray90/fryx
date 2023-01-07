@@ -20,12 +20,25 @@ class XMR:
       try:
         rpc = AuthServiceProxy(MONERO)
         txs = rpc.get_transfers({
-          'in':True,
+          'in': True,
           'filter_by_height': True,
           'min_height': height-1,
           'max_height': height
           }).get('in', [])
         return [(tx['address'], Decimal(tx['amount'])/(10**12)) for tx in txs if tx['height'] == height and tx['locked'] == False]
+      except:
+        sleep(1)
+
+  def get_unconfirmed_transactions(self, address):
+    while True:
+      try:
+        rpc = AuthServiceProxy(MONERO)
+        txs = rpc.get_transfers({
+          'in': True,
+          'filter_by_height': True,
+          'min_height': self.height(),
+          }).get('in', [])
+        return [{'amount': Decimal(tx['amount'])/(10**12), 'confirmations': tx.get('confirmations')} for tx in txs if tx['address'] == address and tx['locked'] == False]
       except:
         sleep(1)
 

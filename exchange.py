@@ -315,5 +315,5 @@ class Exchange:
       try:
         [auto] = session.query(AutoOrder).where(AutoOrder.id == id)
       except:
-        return None
-      return auto.deposit_address
+        return None, []
+      return auto.deposit_address, assets['XMR' if order_type == OrderType.SELL else 'BTC'].get_unconfirmed_transactions(auto.deposit_address)
