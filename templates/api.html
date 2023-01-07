@@ -46,7 +46,7 @@
 }]</pre></td></tr>
   <tr><th>/deposit</th><td><ul><li>api_key</li><li>currency</li></ul></td><td>Gets a deposit address for <u>currency</u>.</td><td><pre>{"address": "bc1qh5jnz3tjtvththmd0sjru5sq97p8e9qj9mm794"}</pre></td></tr>
   <tr><th>/withdraw</th><td><ul><li>api_key</li><li>currency</li><li>amount</li></ul></td>
-    <td>Withdraws <u>amount</u> of <u>currency</u> to <u>address</u>.<br/>Remember to leave enough for withdrawal fees in your account.</td><td><pre>{"success": true}</pre></td></tr>
+    <td>Withdraws <u>amount</u> of <u>currency</u> to <u>address</u>. Total withdrawn is <u>amount</u>-</u>withdrawal fee</u>.</td><td><pre>{"success": true}</pre></td></tr>
   <tr><th>/buy</th><td><ul><li>api_key</li><li>amount</li><li>price</li></ul></td>
     <td>Creates a buy order to buy <u>amount</u> of XMR at <u>price</u> or below.<br/>Returns the <u>order_id</u>, or success if the order was filled.</td><td><pre>{"order_id": 1}</pre><pre>{"success": true}</td></tr>
   <tr><th>/sell</th><td><ul><li>api_key</li><li>amount</li><li>price</li></ul></td>

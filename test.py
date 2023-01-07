@@ -61,12 +61,12 @@ class TestExchange(TestCase):
     self.assertEqual(exchange.withdraw(user, 'unknown', '1btcaddress', Decimal('1')), {'error': 'Currency not found'})
     self.assertEqual(exchange.withdraw(user, 'BTC', '1btcaddress', Decimal('0.01000001')), {'error': 'Not enough funds'})
     self.assertEqual(exchange.withdraw(user, 'BTC', '1btcaddress', Decimal('0.005')), {'success': True})
-    self.assertEqual(exchange.balances(user), {"BTC": Decimal('0.0049'), "XMR": 0})
+    self.assertEqual(exchange.balances(user), {"BTC": Decimal('0.005'), "XMR": 0})
     self.assertEqual(exchange.withdraw(user, 'BTC', '1btcaddress', Decimal('0.0025')), {'success': True})
-    self.assertEqual(exchange.balances(user), {"BTC": Decimal('0.0023'), "XMR": 0})
+    self.assertEqual(exchange.balances(user), {"BTC": Decimal('0.0025'), "XMR": 0})
     self.assertEqual(assets['BTC'].withdrawals(), [
-        ('1btcaddress', Decimal('0.005')),
-        ('1btcaddress', Decimal('0.0025'))
+        ('1btcaddress', Decimal('0.0049')),
+        ('1btcaddress', Decimal('0.0024'))
       ])
     blockchain_monitor.stop()
 

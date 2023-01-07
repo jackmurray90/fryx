@@ -111,15 +111,16 @@ class Exchange:
         return {'error': 'Currency not found'}
       if not is_valid(amount) or amount != assets[asset.name].round_down(amount):
         return {'error': 'Invalid amount'}
-      if amount < assets[asset.name].minimum_withdrawal():
+      amount_to_withdraw = amount - assets[asset.name].withdrawal_fee()
+      if amount_to_withdraw < assets[asset.name].minimum_withdrawal():
         return {'error': 'Amount too small'}
       if not assets[asset.name].validate_address(address):
         return {'error': 'Invalid address'}
       balance = self.get_balance(session, user, asset)
-      if balance.amount < amount + assets[asset.name].withdrawal_fee():
+      if balance.amount < amount:
         return {'error': 'Not enough funds'}
-      assets[asset.name].withdraw(address, amount)
-      balance.amount -= amount + assets[asset.name].withdrawal_fee()
+      assets[asset.name].withdraw(address, amount_to_withdraw)
+      balance.amount -= amount
       session.commit()
       return {'success': True}
 
