@@ -179,7 +179,7 @@ class Exchange:
         orders = session.query(Order).where(
             Order.order_type == OrderType.BUY
           ).order_by(
-            Order.price.asc(),
+            Order.price.desc(),
             Order.id.asc()
           ).limit(1000).all()
         if orders == []:
@@ -236,9 +236,9 @@ class Exchange:
       session.execute('LOCK TABLE orders IN ACCESS EXCLUSIVE MODE;')
       while not foundStoppingPoint:
         orders = session.query(Order).where(
-            Order.order_type == OrderType.BUY
+            Order.order_type == OrderType.SELL
           ).order_by(
-            Order.price.desc(),
+            Order.price.asc(),
             Order.id.asc()
           ).limit(1000).all()
         if orders == []:

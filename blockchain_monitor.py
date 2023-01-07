@@ -60,7 +60,7 @@ class BlockchainMonitor:
         orders = session.query(Order).where(
             Order.order_type == OrderType.BUY if order_type == OrderType.SELL else OrderType.SELL
           ).order_by(
-            Order.price.desc() if order_type == OrderType.SELL else Order.price.asc(),
+            Order.price.asc() if order_type == OrderType.SELL else Order.price.desc(),
             Order.id.asc()
           ).limit(1000).all()
         if orders == []:
