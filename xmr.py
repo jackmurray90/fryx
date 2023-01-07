@@ -2,6 +2,7 @@ from monerorpc.authproxy import AuthServiceProxy, JSONRPCException
 from env import MONERO
 from time import sleep
 from decimal import Decimal
+from http.client import CannotSendRequest
 
 MINCONF = 29
 
@@ -52,7 +53,8 @@ class XMR:
             'address': address
             }]
           })
-      except:
+        break
+      except CannotSendRequest:
         sleep(1)
 
   def get_new_deposit_address(self):

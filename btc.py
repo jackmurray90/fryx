@@ -48,7 +48,9 @@ class BTC:
       try:
         rpc = AuthServiceProxy(BITCOIN)
         rpc.send({address: amount})
+        break
       except CannotSendRequest:
+        print("Cannot send request")
         sleep(1)
 
   def get_new_deposit_address(self):
