@@ -9,4 +9,5 @@ if __name__ == '__main__':
   session = Session(engine)
   session.add(Asset(name='BTC', height=768763))
   session.add(Asset(name='XMR', height=2784543))
+  session.add(User(api_key='auto'))
   session.commit()
