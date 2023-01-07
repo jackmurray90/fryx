@@ -29,8 +29,12 @@ def format_decimal(d, decimal_places):
       decimal_places -= 1
   return result
 
-@app.route('/')
-def index():
+@app.route('/api')
+def api():
+  return render_template('api.html')
+
+@app.route('/', methods=['GET', 'POST'])
+def auto_buy():
   try:
     referrer_hostname = re.match('https?://([^/]*)', request.referrer).group(1)()
   except:
@@ -43,14 +47,6 @@ def index():
     except:
       session.add(Referrer(hostname=referrer_hostname, count=1))
       session.commit()
-    return render_template('index.html')
-
-@app.route('/api')
-def api():
-  return render_template('api.html')
-
-@app.route('/auto/buy', methods=['GET', 'POST'])
-def auto_buy():
   if not 'monero_address' in request.form:
     return render_template('buy.html')
   errors = []
