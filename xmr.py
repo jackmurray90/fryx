@@ -4,7 +4,7 @@ from time import sleep
 from decimal import Decimal
 from http.client import CannotSendRequest
 
-MINCONF = 29
+MINCONF = 24
 
 class XMR:
   def height(self):
