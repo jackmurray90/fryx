@@ -25,7 +25,7 @@ class BTC:
         incoming_txs = []
         for tx in txs['transactions']:
           if tx.get('category') == 'receive' and tx.get('blockheight') == height:
-            incoming_txs.append((tx.get('address'), tx.get('amount')))
+            incoming_txs.append((tx.get('address'), Decimal(tx.get('amount'))))
         return incoming_txs
       except:
         sleep(1)
@@ -38,7 +38,7 @@ class BTC:
         incoming_txs = []
         for tx in txs['transactions']:
           if tx.get('category') == 'receive' and tx.get('address') == address:
-            incoming_txs.append({'amount': tx.get('amount'), 'confirmations': tx.get('confirmations') or 0})
+            incoming_txs.append({'amount': Decimal(tx.get('amount')), 'confirmations': tx.get('confirmations') or 0})
         return incoming_txs
       except:
         sleep(1)
