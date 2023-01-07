@@ -74,10 +74,10 @@ class BlockchainMonitor:
     foundStoppingPoint = False
     withdrawal_amount = 0
     with Session(self.engine) as session:
-      session.begin_nested()
-      session.execute('LOCK TABLE orders IN ACCESS EXCLUSIVE MODE;')
       [asset] = session.query(Asset).where(Asset.name == 'XMR')
       [currency] = session.query(Asset).where(Asset.name == 'BTC')
+      session.begin_nested()
+      session.execute('LOCK TABLE orders IN ACCESS EXCLUSIVE MODE;')
       while not foundStoppingPoint:
         orders = session.query(Order).where(
             Order.order_type == (OrderType.BUY if auto.order_type == OrderType.SELL else OrderType.SELL)

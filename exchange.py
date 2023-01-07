@@ -168,13 +168,15 @@ class Exchange:
         return {'error': 'api_key not found'}
       [asset] = session.query(Asset).where(Asset.name == 'XMR')
       [currency] = session.query(Asset).where(Asset.name == 'BTC')
+      session.begin_nested()
+      session.execute('LOCK TABLE orders IN ACCESS EXCLUSIVE MODE;')
       balance = self.get_balance(session, user, currency)
       if round_up_to_18_decimal_places(amount * price) > balance.amount:
+        session.commit()
+        session.commit()
         return {'error':'Insufficient BTC'}
       balance.amount -= round_up_to_18_decimal_places(amount * price)
       foundStoppingPoint = False
-      session.begin_nested()
-      session.execute('LOCK TABLE orders IN ACCESS EXCLUSIVE MODE;')
       while not foundStoppingPoint:
         orders = session.query(Order).where(
             Order.order_type == OrderType.BUY
@@ -227,13 +229,15 @@ class Exchange:
         return {'error': 'api_key not found'}
       [asset] = session.query(Asset).where(Asset.name == 'XMR')
       [currency] = session.query(Asset).where(Asset.name == 'BTC')
+      session.begin_nested()
+      session.execute('LOCK TABLE orders IN ACCESS EXCLUSIVE MODE;')
       balance = self.get_balance(session, user, asset)
       if amount > balance.amount:
+        session.commit()
+        session.commit()
         return {'error': 'Insufficient XMR'}
       balance.amount -= amount
       foundStoppingPoint = False
-      session.begin_nested()
-      session.execute('LOCK TABLE orders IN ACCESS EXCLUSIVE MODE;')
       while not foundStoppingPoint:
         orders = session.query(Order).where(
             Order.order_type == OrderType.SELL
