@@ -3,7 +3,7 @@ from env import MONERO
 from time import sleep
 from decimal import Decimal
 
-MINCONF = 30
+MINCONF = 29
 
 class XMR:
   def height(self):
