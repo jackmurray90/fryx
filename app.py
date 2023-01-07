@@ -23,7 +23,7 @@ def format_decimal(d, decimal_places):
     result += str(floor(d % digit * 10 / digit))
     digit /= 10
     if digit == 1:
-      result += '.' 
+      result += '.'
     if digit < 1:
       decimal_places -= 1
   return result
