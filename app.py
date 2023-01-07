@@ -129,7 +129,6 @@ def withdraw():
   try:
     amount = Decimal(request.args['amount'])
   except:
-    print(amount, "is not a decimal")
     return {'error': 'Invalid amount'}
   return exchange.withdraw(request.args['api_key'], request.args['currency'], request.args['address'], amount)
 
