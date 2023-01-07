@@ -1,6 +1,7 @@
 <!doctype html>
 <style>
   body { text-align: center; }
+  .underline { text-decoration: underline; } 
 </style>
 <meta http-equiv="refresh" content="60">
 <script src="/decimal.js"></script>
@@ -55,7 +56,7 @@
 <p>Your deposit address is: {{ address }}</p>
 <p>As soon as we receive a deposit, we will exchange it and send the result to the address you provided.</p>
 <p>Please allow 30 blocks confirmation time for Monero.</p>
-<p>This page will automatically update with progress as your transaction is being processed.</p>
+<p>This page will automatically update listing unconfirmed transactions.</p>
 {% for transaction in unconfirmed_transactions %}
-  <p>Receiving {{ transaction['amount']|format_decimal(12) }} XMR, {{ transaction['confirmations'] }} confirmations.</p>
+  <p class='underline'>Receiving {{ transaction['amount']|format_decimal(12) }} XMR, {{ transaction['confirmations'] }} confirmations.</p>
 {% endfor %}
