@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Session
 from assets import assets
-from db import Asset, Balance, DepositAddress, AutoOrder
+from db import Asset, Balance, DepositAddress, AutoOrder, Order, Trade, OrderType
 from sqlalchemy import create_engine
 from threading import Thread
 from time import sleep
+from exchange import round_to_18_decimal_places
 from env import DB
 
 class BlockchainMonitor:
@@ -29,12 +30,17 @@ class BlockchainMonitor:
         while asset.height < assets[asset.name].height():
           print("Proccesing block height", asset.height, "for asset", asset_name)
           for address, amount in assets[asset.name].get_incoming_txs(asset.height):
+            auto = None
             try:
               [auto] = session.query(AutoOrder).where(AutoOrder.deposit_address == address)
-              self.execute_trade(auto, amount)
-              continue
             except:
               pass
+            if auto:
+              try:
+                self.execute_trade(auto, amount)
+              except Exception as e:
+                print(e)
+              continue
             try:
               [deposit_address] = session.query(DepositAddress).where(DepositAddress.address == address)
               try:
@@ -50,27 +56,43 @@ class BlockchainMonitor:
           session.commit()
         sleep(0.1 if self.rapid_update else 1)
 
-  def execute_trade(auto, amount):
+  def get_balance(self, session, user, asset):
+    try:
+      [balance] = session.query(Balance).where((Balance.user == user) & (Balance.asset == asset))
+    except:
+      balance = Balance(user_id=user.id, asset_id=asset.id, amount=0)
+      session.add(balance)
+      session.commit()
+    return balance
+
+  def execute_trade(self, auto, amount):
     foundStoppingPoint = False
     withdrawal_amount = 0
     with Session(self.engine) as session:
       session.begin_nested()
       session.execute('LOCK TABLE orders IN ACCESS EXCLUSIVE MODE;')
+      [asset] = session.query(Asset).where(Asset.name == 'XMR')
       while not foundStoppingPoint:
         orders = session.query(Order).where(
-            Order.order_type == OrderType.BUY if order_type == OrderType.SELL else OrderType.SELL
+            Order.order_type == OrderType.BUY if auto.order_type == OrderType.SELL else OrderType.SELL
           ).order_by(
-            Order.price.asc() if order_type == OrderType.SELL else Order.price.desc(),
+            Order.price.asc() if auto.order_type == OrderType.SELL else Order.price.desc(),
             Order.id.asc()
           ).limit(1000).all()
         if orders == []:
           foundStoppingPoint = True
         for order in orders:
           trade_amount = min(amount, order.amount - order.executed)
-          session.add(Trade(user=order.user, order_type=OrderType.BUY, amount=trade_amount, price=order.price))
-          matching_user_currency_balance = self.get_balance(session, order.user, asset)
-          matching_user_currency_balance.amount += trade_amount
-          withdrawal_amount += round_to_18_decimal_places(trade_amount * order.price)
+          if auto.order_type == OrderType.BUY:
+            session.add(Trade(user_id=order.user_id, order_type=OrderType.SELL, amount=trade_amount, price=order.price))
+            matching_user_currency_balance = self.get_balance(session, order.user, currency)
+            matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * order.price)
+            withdrawal_amount += trade_amount
+          else:
+            session.add(Trade(user_id=order.user_id, order_type=OrderType.BUY, amount=trade_amount, price=order.price))
+            matching_user_currency_balance = self.get_balance(session, order.user, asset)
+            matching_user_currency_balance.amount += trade_amount
+            withdrawal_amount += round_to_18_decimal_places(trade_amount * order.price)
           order.executed += trade_amount
           amount -= trade_amount
           if order.executed == order.amount:
@@ -83,15 +105,17 @@ class BlockchainMonitor:
             break
       session.commit()
       session.commit()
-      asset = assets['BTC' if order_type == Order.SELL else 'XMR']
+      asset = assets['BTC' if auto.order_type == OrderType.SELL else 'XMR']
       withdrawal_amount -= asset.withdrawal_fee()
       if withdrawal_amount > 0:
         try:
+          print("Withdrawing", withdrawal_amount, "to", auto.withdrawal_address)
           asset.withdraw(auto.withdrawal_address, withdrawal_amount)
         except:
           pass
       if amount > 0:
         try:
+          print("Refunding", amount, "to", auto.refund_address)
           other_asset.withdraw(auto.refund_address, amount)
         except:
           pass
