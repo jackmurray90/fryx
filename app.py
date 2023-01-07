@@ -41,7 +41,7 @@ def index():
       ref.count += 1
       session.commit()
     except:
-      session.add(Referrer(hostname=referrer_hostname), count=1)
+      session.add(Referrer(hostname=referrer_hostname, count=1))
       session.commit()
     return render_template('index.html')
 
