@@ -5,9 +5,22 @@
 <script src="/decimal.js"></script>
 <script>
   async function calculate() {
-    let amount = new Decimal(document.getElementById("amount").value);
-    const response = await fetch("/order_book");
-    const order_book = await response.json();
+    document.getElementById('result').innerHTML = 'Calculating...';
+    let amount = null;
+    try {
+      amount = new Decimal(document.getElementById("amount").value);
+    } catch (e) {
+      document.getElementById('result').innerHTML = 'Please input a decimal amount.';
+      return;
+    }
+    let order_book = null;
+    try {
+      const response = await fetch("/order_book");
+      order_book = await response.json();
+    } catch (e) {
+      document.getElementById('result').innerHTML = 'Too many requests in a short-interval, please try again.';
+      return;
+    }
     order_book.sell.sort((a, b) => Decimal.sub(a.price, b.price).toNumber());
     let approximate_cost = new Decimal('0');
     let amount_exchanged = new Decimal('0');
