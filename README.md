@@ -16,3 +16,5 @@ Create a new database and configure postgres, bitcoin, and monero settings in en
 Sync both blockchains and run setup.py to setup the databases.
 
 Then run the server using flask.
+
+In the background, run blockchain\_monitor.py
