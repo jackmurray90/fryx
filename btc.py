@@ -3,7 +3,6 @@ from math import floor
 from decimal import Decimal
 from env import BITCOIN
 from time import sleep
-from http.client import CannotSendRequest
 
 MINCONF = 4
 
@@ -48,7 +47,9 @@ class BTC:
         rpc = AuthServiceProxy(BITCOIN)
         rpc.send({address: amount})
         break
-      except CannotSendRequest:
+      except JSONRPCException:
+        break
+      except:
         sleep(1)
 
   def get_new_deposit_address(self):

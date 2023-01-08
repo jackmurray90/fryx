@@ -36,7 +36,7 @@ class XMR:
         txs = rpc.get_transfers({
           'in': True,
           'filter_by_height': True,
-          'min_height': self.height(),
+          'min_height': self.height()-1,
           }).get('in', [])
         return [{'amount': Decimal(tx['amount'])/(10**12), 'confirmations': tx.get('confirmations')} for tx in txs if tx['address'] == address]
       except:
@@ -53,7 +53,9 @@ class XMR:
             }]
           })
         break
-      except CannotSendRequest:
+      except JSONRPCException:
+        break
+      except:
         sleep(1)
 
   def get_new_deposit_address(self):
