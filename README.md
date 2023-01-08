@@ -1,8 +1,8 @@
-# Trade API
+# Fryx
 
-Trade API is an open source cryptocurrency exchange.
+Fryx is an open-source cryptocurrency exchange.
 
-There is currently an implementation running at fryx.finance.
+There is currently an implementation running at https://fryx.finance.
 
 ## Instructions
 
