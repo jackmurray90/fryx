@@ -3,6 +3,7 @@ from env import MONERO
 from time import sleep
 from decimal import Decimal
 from http.client import CannotSendRequest
+from math import floor
 
 MINCONF = 24
 
