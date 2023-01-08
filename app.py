@@ -31,10 +31,12 @@ def format_decimal(d, decimal_places):
 
 @app.route('/api')
 def api():
+  rate_limit(ip=True)
   return render_template('api.html')
 
 @app.route('/', methods=['GET', 'POST'])
 def xmr_buy():
+  rate_limit(ip=True)
   try:
     referrer_hostname = re.match('https?://([^/]*)', request.referrer).group(1)()
   except:
@@ -64,6 +66,7 @@ def xmr_buy():
 
 @app.route('/xmr/sell', methods=['GET', 'POST'])
 def xmr_sell():
+  rate_limit(ip=True)
   if not 'bitcoin_address' in request.form:
     return render_template('sell.html')
   errors = []
@@ -81,6 +84,7 @@ def xmr_sell():
 
 @app.get('/xmr/buy/<id>')
 def xmr_buy_id(id):
+  rate_limit(ip=True)
   auto, unconfirmed_transactions, confirmed_deposits = exchange.get_auto(id)
   if not auto:
     abort(404)
@@ -88,6 +92,7 @@ def xmr_buy_id(id):
 
 @app.get('/xmr/sell/<id>')
 def xmr_sell_id(id):
+  rate_limit(ip=True)
   auto, unconfirmed_transactions, confirmed_deposits = exchange.get_auto(id)
   if not auto:
     abort(404)
@@ -176,10 +181,12 @@ def rate_limit(ip=False):
     try:
       [rate_limit] = session.query(RateLimit).where(RateLimit.address == address)
     except:
-      rate_limit = RateLimit(address=address, timestamp=0)
+      rate_limit = RateLimit(address=address, timestamps='')
       session.add(rate_limit)
       session.commit()
-    if rate_limit.timestamp + Decimal('0.5') > time():
+    timestamps = [float(t) for t in rate_limit.timestamps.split() if float(t) >= time()-1]
+    if len(timestamps) > 50:
       abort(429)
-    rate_limit.timestamp = time()
+    timestamps.append(time())
+    rate_limit.timestamps = ' '.join([str(t) for t in timestamps])
     session.commit()

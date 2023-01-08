@@ -80,7 +80,7 @@ class RateLimit(Base):
   __tablename__ = 'ratelimit'
 
   address = Column(String, primary_key=True)
-  timestamp = Column(Numeric(17, 5))
+  timestamps = Column(String)
 
 class AutoOrder(Base):
   __tablename__ = 'autos'
