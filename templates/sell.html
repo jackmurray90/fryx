@@ -55,7 +55,7 @@
   }
 </script>
 <title>Fryx Finance</title>
-<p id="nav"><a href="/">Buy Monero</a> <a href="/auto/sell">Sell Monero</a> <a href="/api">API Documentation</a></p>
+<p id="nav"><a href="/">Buy Monero</a> <a href="/xmr/sell">Sell Monero</a> <a href="/api">API Documentation</a></p>
 <h1><img src="/header.png"/></h1>
 <p>Enter the amount of XMR you want to sell: <input id="amount"/> <button onClick="calculate()">Calculate approximate value</button></p>
 <p id="result"></p>
@@ -63,7 +63,7 @@
 {% for error in errors %}
   <p>{{ error }}</p>
 {% endfor %}
-<form action="/auto/sell" method="post">
+<form action="/xmr/sell" method="post">
   <p><input name="bitcoin_address" size="100" placeholder="Your Bitcoin address"/></p>
   <p><input name="monero_address" size="100" placeholder="Your Refund Monero address"/></p>
   <p><input type="Submit" value="Sell Monero"/></p>

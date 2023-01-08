@@ -34,7 +34,7 @@ def api():
   return render_template('api.html')
 
 @app.route('/', methods=['GET', 'POST'])
-def auto_buy():
+def xmr_buy():
   try:
     referrer_hostname = re.match('https?://([^/]*)', request.referrer).group(1)()
   except:
@@ -60,10 +60,10 @@ def auto_buy():
   if not auto:
     errors = ['One of your addresses has been used on this site before. Please use a new addresses.']
     return render_template('buy.html', errors=errors)
-  return redirect('/auto/buy/%s' % auto)
+  return redirect('/xmr/buy/%s' % auto)
 
-@app.route('/auto/sell', methods=['GET', 'POST'])
-def auto_sell():
+@app.route('/xmr/sell', methods=['GET', 'POST'])
+def xmr_sell():
   if not 'bitcoin_address' in request.form:
     return render_template('sell.html')
   errors = []
@@ -77,21 +77,21 @@ def auto_sell():
   if not auto:
     errors = ['One of your addresses has been used on this site before. Please use a new addresses.']
     return render_template('buy.html', errors=errors)
-  return redirect('/auto/sell/%s' % auto)
+  return redirect('/xmr/sell/%s' % auto)
 
-@app.get('/auto/buy/<id>')
-def auto_buy_id(id):
+@app.get('/xmr/buy/<id>')
+def xmr_buy_id(id):
   auto, unconfirmed_transactions, confirmed_deposits = exchange.get_auto(id)
   if not auto:
     abort(404)
-  return render_template('auto_buy.html', address=auto, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits)
+  return render_template('xmr_buy.html', address=auto, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits)
 
-@app.get('/auto/sell/<id>')
-def auto_sell_id(id):
+@app.get('/xmr/sell/<id>')
+def xmr_sell_id(id):
   auto, unconfirmed_transactions, confirmed_deposits = exchange.get_auto(id)
   if not auto:
     abort(404)
-  return render_template('auto_sell.html', address=auto, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits)
+  return render_template('xmr_sell.html', address=auto, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits)
 
 @app.route('/order_book')
 def order_book():
