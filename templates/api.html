@@ -24,7 +24,7 @@
 <table>
   <tr><th>Endpoint</th><th>URL Parameters</th><th>Description</th><th>Example Responses</th></tr>
   <tr><th>/new_user</th><td>None</td><td>Generates a new API key.</td><td><pre>{"api_key": "iQtxykjG48y3F9A93jRPqC"}</pre></td></tr>
-  <tr><th>/order_book</th><td>None</td><td>Gets the order book.</td><td>
+  <tr><th>/order_book</th><td><ul><li>market</li></ul></td><td>Gets the order book.</td><td>
 <pre>[{
   "amount":"0.010000000000000000",
   "executed": "0.000000000000000000",
@@ -33,7 +33,7 @@
 }]</pre></td></tr>
   <tr><th>/balances</th><td><ul><li>api_key</li></ul></td><td>Gets the balances for both XMR and BTC.</td>
     <td><pre>{"XMR": "0E-18", "BTC": "0E-18"}</pre></td></tr>
-  <tr><th>/orders</th><td><ul><li>api_key</li></ul></td><td>Gets a list of your open orders.</td>
+    <tr><th>/orders</th><td><ul><li>api_key</li><li>market</li></ul></td><td>Gets a list of your open orders.</td>
     <td>
 <pre>[{
   "amount":"0.010000000000000000",
@@ -42,7 +42,7 @@
   "price":"0.010000000000000000",
   "type":"buy"
 }]</pre></td></tr>
-  <tr><th>/trades</th><td><ul><li>api_key</li></ul></td><td>Gets a list of the trades you have made.</td>
+  <tr><th>/trades</th><td><ul><li>api_key</li><li>market</li></ul></td><td>Gets a list of the trades you have made.</td>
     <td>
 <pre>[{
   "amount":"0.010000000000000000",
@@ -50,12 +50,12 @@
   "timestamp": 1673138672,
   "type":"buy"
 }]</pre></td></tr>
-  <tr><th>/deposit</th><td><ul><li>api_key</li><li>currency</li></ul></td><td>Gets a deposit address for <u>currency</u>.</td><td><pre>{"address": "bc1qh5jnz3tjtvththmd0sjru5sq97p8e9qj9mm794"}</pre></td></tr>
-  <tr><th>/withdraw</th><td><ul><li>api_key</li><li>currency</li><li>amount</li></ul></td>
-    <td>Withdraws <u>amount</u> of <u>currency</u> to <u>address</u>. Total withdrawn is <u>amount</u>-</u>withdrawal fee</u>.</td><td><pre>{"success": true}</pre></td></tr>
-  <tr><th>/buy</th><td><ul><li>api_key</li><li>amount</li><li>price</li></ul></td>
+  <tr><th>/deposit</th><td><ul><li>api_key</li><li>asset</li></ul></td><td>Gets a deposit address for <u>asset</u>.</td><td><pre>{"address": "bc1qh5jnz3tjtvththmd0sjru5sq97p8e9qj9mm794"}</pre></td></tr>
+  <tr><th>/withdraw</th><td><ul><li>api_key</li><li>asset</li><li>amount</li></ul></td>
+    <td>Withdraws <u>amount</u> of <u>asset</u> to <u>address</u>. Total withdrawn is <u>amount</u>-</u>withdrawal fee</u>.</td><td><pre>{"success": true}</pre></td></tr>
+  <tr><th>/buy</th><td><ul><li>api_key</li><li>market</li><li>amount</li><li>price</li></ul></td>
     <td>Creates a buy order to buy <u>amount</u> of XMR at <u>price</u> or below.<br/>Returns the <u>order_id</u>, or success if the order was filled.</td><td><pre>{"order_id": 1}</pre><pre>{"success": true}</td></tr>
-  <tr><th>/sell</th><td><ul><li>api_key</li><li>amount</li><li>price</li></ul></td>
+  <tr><th>/sell</th><td><ul><li>api_key</li><li>market</li><li>amount</li><li>price</li></ul></td>
     <td>Creates a sell order to sell <u>amount</u> of XMR at <u>price</u> or above.<br/>Returns the <u>order_id</u>, or success if the order was filled.</td><td><pre>{"order_id": 2}</pre><pre>{"success": true}</pre></td></tr>
   <tr><th>/cancel</th><td><ul><li>api_key</li><li>order_id</li></td><td>Cancels an order.</td><td><pre>{"success": true}</pre></td></tr>
 </table>
@@ -63,4 +63,13 @@
 <table>
   <tr><th>BTC Withdrawal</th><td>0.0001 BTC</td></tr>
   <tr><th>XMR Withdrawal</th><td>0.0001 XMR</td></tr>
+</table>
+<h2>Assets</h2>
+<table>
+  <tr><td>BTC</td></tr>
+  <tr><td>XMR</td></tr>
+</table>
+<h2>Markets</h2>
+<table>
+  <tr><td>XMRBTC</td></tr>
 </table>

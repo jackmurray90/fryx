@@ -55,7 +55,9 @@ class Exchange:
 
   # API Methods
 
-  def order_book(self):
+  def order_book(self, market):
+    if market != 'XMRBTC':
+      return {'error': 'The only market supported is XMRBTC'}
     with Session(self.engine) as session:
       orders = session.query(Order).all()
       return {'buy': [{
@@ -86,7 +88,7 @@ class Exchange:
       try:
         [asset] = session.query(Asset).where(Asset.name == asset_name.upper())
       except:
-        return {'error': 'Currency not found'}
+        return {'error': 'Asset not found'}
       try:
         [deposit_address] = session.query(DepositAddress).where((DepositAddress.user == user) & (DepositAddress.asset == asset))
       except:
@@ -108,7 +110,7 @@ class Exchange:
       try:
         [asset] = session.query(Asset).where(Asset.name == asset_name.upper())
       except:
-        return {'error': 'Currency not found'}
+        return {'error': 'Asset not found'}
       if not is_valid(amount) or amount != assets[asset.name].round_down(amount):
         return {'error': 'Invalid amount'}
       amount_to_withdraw = amount - assets[asset.name].withdrawal_fee()
@@ -132,7 +134,9 @@ class Exchange:
         return {'error': 'api_key not found'}
       return dict([(asset.name, self.get_balance(session, user, asset).amount) for asset in session.query(Asset).all()])
 
-  def orders(self, api_key):
+  def orders(self, api_key, market):
+    if market != 'XMRBTC':
+      return {'error': 'The only market supported is XMRBTC'}
     with Session(self.engine) as session:
       try:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
@@ -146,7 +150,9 @@ class Exchange:
           'price': order.price
         } for order in user.orders]
 
-  def trades(self, api_key):
+  def trades(self, api_key, market):
+    if market != 'XMRBTC':
+      return {'error': 'The only market supported is XMRBTC'}
     with Session(self.engine) as session:
       try:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
@@ -158,7 +164,9 @@ class Exchange:
           'price': trade.price
         } for trade in user.trades]
 
-  def buy(self, api_key, amount, price):
+  def buy(self, api_key, market, amount, price):
+    if market != 'XMRBTC':
+      return {'error': 'The only market supported is XMRBTC'}
     if not is_valid(amount):
       return {'error': 'Invalid amount'}
     if not is_valid(price):
@@ -219,7 +227,9 @@ class Exchange:
       session.commit()
       return {'success': True}
 
-  def sell(self, api_key, amount, price):
+  def sell(self, api_key, market, amount, price):
+    if market != 'XMRBTC':
+      return {'error': 'The only market supported is XMRBTC'}
     if not is_valid(amount):
       return {'error': 'Invalid amount'}
     if not is_valid(price):

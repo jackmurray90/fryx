@@ -96,7 +96,7 @@ def xmr_sell_id(id):
 @app.route('/order_book')
 def order_book():
   rate_limit(ip=True)
-  return exchange.order_book()
+  return exchange.order_book(request.args['market'])
 
 @app.route('/new_user')
 def new_user():
@@ -111,17 +111,17 @@ def balances():
 @app.route('/orders')
 def orders():
   rate_limit()
-  return exchange.orders(request.args['api_key'])
+  return exchange.orders(request.args['api_key'], request.args['market'])
 
 @app.route('/trades')
 def trades():
   rate_limit()
-  return exchange.trades(request.args['api_key'])
+  return exchange.trades(request.args['api_key'], request.args['market'])
 
 @app.route('/deposit')
 def deposit():
   rate_limit()
-  return exchange.deposit(request.args['api_key'], request.args['currency'])
+  return exchange.deposit(request.args['api_key'], request.args['asset'])
 
 @app.route('/withdraw')
 def withdraw():
@@ -130,7 +130,7 @@ def withdraw():
     amount = Decimal(request.args['amount'])
   except:
     return {'error': 'Invalid amount'}
-  return exchange.withdraw(request.args['api_key'], request.args['currency'], request.args['address'], amount)
+  return exchange.withdraw(request.args['api_key'], request.args['asset'], request.args['address'], amount)
 
 @app.route('/buy')
 def buy():
@@ -143,7 +143,7 @@ def buy():
     price = Decimal(request.args['price'])
   except:
     return {'error': 'Invalid price'}
-  return exchange.buy(request.args['api_key'], amount, price)
+  return exchange.buy(request.args['api_key'], request.args['market'], amount, price)
 
 @app.route('/sell')
 def sell():
@@ -156,7 +156,7 @@ def sell():
     price = Decimal(request.args['price'])
   except:
     return {'error': 'Invalid price'}
-  return exchange.sell(request.args['api_key'], amount, price)
+  return exchange.sell(request.args['api_key'], request.args['market'], amount, price)
 
 @app.route('/cancel')
 def cancel():
