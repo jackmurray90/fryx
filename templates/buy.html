@@ -27,7 +27,7 @@
     }
     let order_book = null;
     try {
-      const response = await fetch("/order_book");
+      const response = await fetch("/order_book?market=XMRBTC");
       order_book = await response.json();
     } catch (e) {
       document.getElementById('result').innerHTML = 'Too many requests in a short-interval, please try again.';
