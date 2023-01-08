@@ -184,7 +184,7 @@ def rate_limit(ip=False):
 
 def log_referrer():
   try:
-    referrer_hostname = re.match('https?://([^/]*)', request.referrer).group(1)()
+    referrer_hostname = re.match('https?://([^/]*)', request.referrer).group(1)
   except:
     referrer_hostname = 'unknown'
   with Session(engine) as session:
