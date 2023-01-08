@@ -260,7 +260,7 @@ class Exchange:
         if orders == []:
           foundStoppingPoint = True
         for order in orders:
-          if order.price > price:
+          if order.price < price:
             foundStoppingPoint = True
             break
           trade_amount = min(amount, order.amount - order.executed)
