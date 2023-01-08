@@ -38,7 +38,7 @@ class XMR:
           'filter_by_height': True,
           'min_height': self.height(),
           }).get('in', [])
-        return [{'amount': Decimal(tx['amount'])/(10**12), 'confirmations': tx.get('confirmations')} for tx in txs if tx['address'] == address and tx['locked'] == False]
+        return [{'amount': Decimal(tx['amount'])/(10**12), 'confirmations': tx.get('confirmations')} for tx in txs if tx['address'] == address]
       except:
         sleep(1)
 
