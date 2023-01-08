@@ -54,9 +54,9 @@
   <tr><th>/withdraw</th><td><ul><li>api_key</li><li>asset</li><li>amount</li></ul></td>
     <td>Withdraws <u>amount</u> of <u>asset</u> to <u>address</u>. Total withdrawn is <u>amount</u>-</u>withdrawal fee</u>.</td><td><pre>{"success": true}</pre></td></tr>
   <tr><th>/buy</th><td><ul><li>api_key</li><li>market</li><li>amount</li><li>price</li></ul></td>
-    <td>Creates a buy order to buy <u>amount</u> of base asset in <u>market</u> at <u>price</u> or below.<br/>Returns the <u>order_id</u>, or success if the order was filled.</td><td><pre>{"order_id": 1}</pre><pre>{"success": true}</td></tr>
+    <td>Creates an order to buy <u>amount</u> of base asset in <u>market</u> at <u>price</u> or below.<br/>Returns the <u>order_id</u>, or success if the order was filled.</td><td><pre>{"order_id": 1}</pre><pre>{"success": true}</td></tr>
   <tr><th>/sell</th><td><ul><li>api_key</li><li>market</li><li>amount</li><li>price</li></ul></td>
-    <td>Creates a sell order to sell <u>amount</u> of base asset in <u>market</u> at <u>price</u> or above.<br/>Returns the <u>order_id</u>, or success if the order was filled.</td><td><pre>{"order_id": 2}</pre><pre>{"success": true}</pre></td></tr>
+    <td>Creates an order to sell <u>amount</u> of base asset in <u>market</u> at <u>price</u> or above.<br/>Returns the <u>order_id</u>, or success if the order was filled.</td><td><pre>{"order_id": 2}</pre><pre>{"success": true}</pre></td></tr>
   <tr><th>/cancel</th><td><ul><li>api_key</li><li>order_id</li></td><td>Cancels an order.</td><td><pre>{"success": true}</pre></td></tr>
 </table>
 <h2>Withdrawal Fees</h2>
