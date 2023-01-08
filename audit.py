@@ -32,10 +32,14 @@ if __name__ == '__main__':
     xmr_balance = Decimal(xmr_rpc.get_balance()['balance'])/10**12
 
     if btc_balance >= total_btc:
-      print("Bitcoin passed. wallet balance is ", btc_balance, "total in accounts is", total_btc_in_accounts, "total in orders is", total_btc_in_orders)
+      print("Bitcoin passed.")
     else:
-      print("Bitcoin failed. wallet balance is ", btc_balance, "total in accounts is", total_btc_in_accounts, "total in orders is", total_btc_in_orders)
+      print("Bitcoin failed.")
     if xmr_balance >= total_xmr:
-      print("Monero passed. wallet balance is ", xmr_balance, "total in accounts is", total_xmr_in_accounts, "total in orders is", total_xmr_in_orders)
+      print("Monero passed.")
     else:
-      print("Monero failed. wallet balance is ", xmr_balance, "total in accounts is", total_xmr_in_accounts, "total in orders is", total_xmr_in_orders)
+      print("Monero failed.")
+    print("btc wallet balance is ", btc_balance, "total in accounts is", total_btc_in_accounts, "total in orders is", total_btc_in_orders)
+    print("difference is", btc_balance-total_btc)
+    print("xmr wallet balance is ", xmr_balance, "total in accounts is", total_xmr_in_accounts, "total in orders is", total_xmr_in_orders)
+    print("difference is", xmr_balance-total_xmr)
