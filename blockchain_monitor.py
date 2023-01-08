@@ -123,7 +123,8 @@ class BlockchainMonitor:
       withdrawal_amount -= asset.withdrawal_fee()
       if withdrawal_amount > 0:
         try:
-          print("Withdrawing", withdrawal_amount, "to", auto.withdrawal_address)
+          withdrawal_amount = asset.round_down(withdrawal_amount)
+          print("Auto Withdrawing", withdrawal_amount, "to", auto.withdrawal_address)
           asset.withdraw(auto.withdrawal_address, withdrawal_amount)
         except:
           pass
@@ -132,7 +133,8 @@ class BlockchainMonitor:
         raise Exception
       if amount > 0:
         try:
-          print("Refunding", amount, "to", auto.refund_address)
+          amount = asset.round_down(withdrawal_amount)
+          print("Auto Refunding", amount, "to", auto.refund_address)
           other_asset.withdraw(auto.refund_address, amount)
         except:
           pass
