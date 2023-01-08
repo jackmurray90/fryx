@@ -91,6 +91,15 @@ class AutoOrder(Base):
   withdrawal_address = Column(String, unique=True)
   refund_address = Column(String)
 
+  deposits = relationship('AutoDeposit')
+
+class AutoDeposit(Base):
+  __tablename__ = 'autodeposits'
+
+  id = Column(Integer, primary_key=True)
+  auto_id = Column(String, ForeignKey('autos.id'))
+  amount = Column(Numeric(28, 18))
+
 class Referrer(Base):
   __tablename__ = 'referrers'
 

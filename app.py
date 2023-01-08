@@ -81,17 +81,17 @@ def auto_sell():
 
 @app.get('/auto/buy/<id>')
 def auto_buy_id(id):
-  auto, unconfirmed_transactions = exchange.get_auto(id)
+  auto, unconfirmed_transactions, confirmed_deposits = exchange.get_auto(id)
   if not auto:
     abort(404)
-  return render_template('auto_buy.html', address=auto, unconfirmed_transactions=unconfirmed_transactions)
+  return render_template('auto_buy.html', address=auto, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits)
 
 @app.get('/auto/sell/<id>')
 def auto_sell_id(id):
-  auto, unconfirmed_transactions = exchange.get_auto(id)
+  auto, unconfirmed_transactions, confirmed_deposits = exchange.get_auto(id)
   if not auto:
     abort(404)
-  return render_template('auto_sell.html', address=auto, unconfirmed_transactions=unconfirmed_transactions)
+  return render_template('auto_sell.html', address=auto, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits)
 
 @app.route('/order_book')
 def order_book():

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from assets import assets
-from db import Asset, Balance, DepositAddress, AutoOrder, Order, Trade, OrderType, User
+from db import Asset, Balance, DepositAddress, AutoOrder, Order, Trade, OrderType, User, AutoDeposit
 from sqlalchemy import create_engine
 from threading import Thread
 from time import sleep, time
@@ -33,6 +33,8 @@ class BlockchainMonitor:
             auto = None
             try:
               [auto] = session.query(AutoOrder).where(AutoOrder.deposit_address == address)
+              session.add(AutoDeposit(auto_id=auto.id, amount=amount))
+              session.commit()
             except:
               pass
             if auto:

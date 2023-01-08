@@ -62,5 +62,8 @@
 <p>Please allow 25 blocks confirmation time for Monero.</p>
 <p>This page will automatically update listing unconfirmed transactions.</p>
 {% for transaction in unconfirmed_transactions %}
-  <p><strong>Receiving {{ transaction['amount']|format_decimal(12) }} XMR, {{ transaction['confirmations'] }} confirmations.</strong></p>
+  <p><strong>Receiving {{ transaction['amount']|format_decimal(12) }} XMR, {{ transaction['confirmations'] }}/25 confirmations.</strong></p>
+{% endfor %}
+{% for amount in confirmed_deposits %}
+  <p><strong>Received {{ amount|format_decimal(12) }} XMR, 25/25 confirmations.</strong></p>
 {% endfor %}
