@@ -19,12 +19,12 @@
     return new Decimal(amount.toFixed(18, Decimal.ROUND_UP));
   }
   async function calculate() {
-    document.getElementById('result').innerHTML = 'Calculating...';
+    document.getElementById('result').innerHTML = '<p>Calculating...</p>';
     let amount = null;
     try {
       amount = new Decimal(document.getElementById("amount").value);
     } catch (e) {
-      document.getElementById('result').innerHTML = 'Please input a decimal amount.';
+      document.getElementById('result').innerHTML = '<p>Please input a decimal amount.</p>';
       return;
     }
     let order_book = null;
@@ -32,7 +32,7 @@
       const response = await fetch("/order_book?market=XMRBTC");
       order_book = await response.json();
     } catch (e) {
-      document.getElementById('result').innerHTML = 'Too many requests in a short-interval, please try again.';
+      document.getElementById('result').innerHTML = '<p>There was an error fetching the exchange rate, please try again.</p>';
       return;
     }
     order_book.sell.sort((a, b) => Decimal.sub(a.price, b.price).toNumber());
@@ -50,9 +50,12 @@
     }
     approximate_cost = approximate_cost.add(new Decimal('0.00001'));
     if (amount.eq(new Decimal(0))) {
-      document.getElementById('result').innerHTML = `This will cost approximately ${approximate_cost.toFixed(8, Decimal.ROUND_UP)} BTC.`;
+      document.getElementById('result').innerHTML =
+        `<p>This will cost approximately ${approximate_cost.toFixed(8, Decimal.ROUND_UP)} BTC.</p>`;
     } else {
-      document.getElementById('result').innerHTML = `The exchange can only exchange ${amount_exchanged.toFixed(12, Decimal.ROUND_DOWN)} XMR at the moment. This will cost approximately ${approximate_cost.toFixed(8, Decimal.ROUND_UP)} BTC.`;
+      document.getElementById('result').innerHTML =
+        `<p>We can only exchange ${amount_exchanged.toFixed(12, Decimal.ROUND_DOWN)} XMR at the moment.</p>` +
+        `<p>This will cost approximately ${approximate_cost.toFixed(8, Decimal.ROUND_UP)} BTC.</p>`;
     }
   }
 </script>
@@ -60,7 +63,7 @@
 <p id="nav"><a href="/">Buy Monero</a> <a href="/xmr/sell">Sell Monero</a> <a href="/api">API Documentation</a></p>
 <h1><img src="/header.png"/></h1>
 <p><input id="amount" placeholder="Amount of Monero"/> <button onClick="calculate()">Calculate approximate cost</button></p>
-<p id="result"></p>
+<div id="result"></div>
 <p>If we can't fulfil your entire order, we will refund the amount that was not exchanged.</p>
 <p>Your deposit address is:</p>
 <p><strong>{{ address }}</strong></p>
