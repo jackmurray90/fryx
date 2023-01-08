@@ -42,7 +42,7 @@ class BlockchainMonitor:
                 self.execute_trade(auto, amount)
               except:
                 # This is a dirty hack to try it twice until we have some proper market makers and it's not just me.
-                sleep(10)
+                sleep(1)
                 try:
                   self.execute_trade(auto, amount)
                 except:
