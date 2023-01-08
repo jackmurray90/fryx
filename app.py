@@ -32,23 +32,13 @@ def format_decimal(d, decimal_places):
 @app.route('/api')
 def api():
   rate_limit(ip=True)
+  log_referrer()
   return render_template('api.html')
 
 @app.route('/', methods=['GET', 'POST'])
 def xmr_buy():
   rate_limit(ip=True)
-  try:
-    referrer_hostname = re.match('https?://([^/]*)', request.referrer).group(1)()
-  except:
-    referrer_hostname = 'unknown'
-  with Session(engine) as session:
-    try:
-      [ref] = session.query(Referrer).where(Referrer.hostname == referrer_hostname)
-      ref.count += 1
-      session.commit()
-    except:
-      session.add(Referrer(hostname=referrer_hostname, count=1))
-      session.commit()
+  log_referrer()
   if not 'monero_address' in request.form:
     return render_template('buy.html')
   errors = []
@@ -67,6 +57,7 @@ def xmr_buy():
 @app.route('/xmr/sell', methods=['GET', 'POST'])
 def xmr_sell():
   rate_limit(ip=True)
+  log_referrer()
   if not 'bitcoin_address' in request.form:
     return render_template('sell.html')
   errors = []
@@ -190,3 +181,17 @@ def rate_limit(ip=False):
     timestamps.append(time())
     rate_limit.timestamps = ' '.join([str(t) for t in timestamps])
     session.commit()
+
+def log_referrer():
+  try:
+    referrer_hostname = re.match('https?://([^/]*)', request.referrer).group(1)()
+  except:
+    referrer_hostname = 'unknown'
+  with Session(engine) as session:
+    try:
+      [ref] = session.query(Referrer).where(Referrer.hostname == referrer_hostname)
+      ref.count += 1
+      session.commit()
+    except:
+      session.add(Referrer(hostname=referrer_hostname, count=1))
+      session.commit()
