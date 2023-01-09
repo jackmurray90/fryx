@@ -33,7 +33,7 @@ class TestExchange(TestCase):
     exchange = fresh_exchange()
     user = exchange.new_user()['api_key']
     self.assertEqual(exchange.deposit('unknown', 'BTC'), {'error': 'api_key not found'})
-    self.assertEqual(exchange.deposit(user, 'unknown'), {'error': 'Currency not found'})
+    self.assertEqual(exchange.deposit(user, 'unknown'), {'error': 'Asset not found'})
     assets['BTC'].get_new_deposit_address = MagicMock(return_value='1btcaddress')
     assets['XMR'].get_new_deposit_address = MagicMock(return_value='1xmraddress')
     self.assertEqual(exchange.deposit(user, 'BTC'), {'address': '1btcaddress'})
@@ -57,7 +57,7 @@ class TestExchange(TestCase):
     self.assertEqual(exchange.withdraw(user, 'BTC', '1btcaddress', Decimal('-1')), {'error': 'Invalid amount'})
     self.assertEqual(exchange.withdraw(user, 'BTC', '1btcaddress', Decimal('0.00009999')), {'error': 'Amount too small'})
     self.assertEqual(exchange.withdraw('unknown', 'BTC', '1btcaddress', Decimal('1')), {'error': 'api_key not found'})
-    self.assertEqual(exchange.withdraw(user, 'unknown', '1btcaddress', Decimal('1')), {'error': 'Currency not found'})
+    self.assertEqual(exchange.withdraw(user, 'unknown', '1btcaddress', Decimal('1')), {'error': 'Asset not found'})
     self.assertEqual(exchange.withdraw(user, 'BTC', '1btcaddress', Decimal('0.01000001')), {'error': 'Not enough funds'})
     self.assertEqual(exchange.withdraw(user, 'BTC', '1btcaddress', Decimal('0.005')), {'success': True})
     self.assertEqual(exchange.balances(user), {"BTC": Decimal('0.005'), "XMR": 0})
@@ -75,35 +75,37 @@ class TestExchange(TestCase):
     user2 = exchange.new_user()['api_key']
     deposit('BTC', exchange.deposit(user1, 'BTC')['address'], Decimal('0.01000000'))
     deposit('XMR', exchange.deposit(user2, 'XMR')['address'], Decimal('1.00000000'))
-    self.assertEqual(exchange.buy(user1, Decimal('0.01'), Decimal('0.01')), {"order_id": 1})
-    self.assertEqual(exchange.orders(user1), [
+    self.assertEqual(exchange.buy(user1, 'XMRBTC', Decimal('0.01'), Decimal('0.01')), {"order_id": 1})
+    self.assertEqual(exchange.orders(user1, 'XMRBTC'), [
       {
         'id': 1,
         'amount': Decimal('0.01'),
         'price': Decimal('0.01'),
         'executed': Decimal('0'),
-        'type': 'BUY'
+        'type': 'buy'
       }
     ])
-    self.assertEqual(exchange.sell(user2, Decimal('0.01'), Decimal('0.01')), {"success": True})
-    self.assertEqual(exchange.orders(user1), [])
-    self.assertEqual(exchange.orders(user2), [])
-    self.assertEqual(exchange.trades(user1), [
+    self.assertEqual(exchange.sell(user2, 'XMRBTC', Decimal('0.01'), Decimal('0.01')), {"success": True})
+    self.assertEqual(exchange.orders(user1, 'XMRBTC'), [])
+    self.assertEqual(exchange.orders(user2, 'XMRBTC'), [])
+    self.assertEqual(exchange.trades(user1, 'XMRBTC'), [
       {
-        'type': 'BUY',
+        'type': 'buy',
         'amount': Decimal('0.01'),
         'price': Decimal('0.01'),
+        'fee': Decimal('0')
       }
     ])
-    self.assertEqual(exchange.trades(user2), [
+    self.assertEqual(exchange.trades(user2, 'XMRBTC'), [
       {
-        'type': 'SELL',
+        'type': 'sell',
         'amount': Decimal('0.01'),
         'price': Decimal('0.01'),
+        'fee': Decimal('0.0000002')
       }
     ])
     self.assertEqual(exchange.balances(user1), {"BTC": Decimal('0.01')-Decimal('0.01')*Decimal('0.01'), "XMR": Decimal('0.01')})
-    self.assertEqual(exchange.balances(user2), {"BTC": Decimal('0.0001'), "XMR": Decimal("0.99")})
+    self.assertEqual(exchange.balances(user2), {"BTC": Decimal('0.0000998'), "XMR": Decimal("0.99")})
     blockchain_monitor.stop()
 
 if __name__ == '__main__':

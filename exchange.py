@@ -1,4 +1,4 @@
-from db import Asset, DepositAddress, User, Balance, Order, OrderType, Trade, AutoOrder
+from db import Asset, DepositAddress, User, Balance, Order, OrderType, Trade, AutoOrder, Market
 from time import time
 from assets import assets
 from sqlalchemy import create_engine
@@ -244,7 +244,7 @@ class Exchange:
       session.commit()
       return {'success': True}
 
-  def sell(self, api_key, market, amount, price):
+  def sell(self, api_key, market_name, amount, price):
     if api_key == 'auto': return {'error': 'Invalid api_key'}
     if not is_valid(amount):
       return {'error': 'Invalid amount'}
