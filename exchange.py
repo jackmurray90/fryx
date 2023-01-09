@@ -196,7 +196,7 @@ class Exchange:
       session.begin_nested()
       session.execute('LOCK TABLE orders IN ACCESS EXCLUSIVE MODE;')
       balance = self.get_balance(session, user, currency)
-      if round_up_to_18_decimal_places(amount * price) > balance.amount:
+      if round_up_to_18_decimal_places(amount * price * (1 + FEE)) > balance.amount:
         session.commit()
         session.commit()
         return {'error':'Insufficient BTC'}
@@ -217,9 +217,10 @@ class Exchange:
             foundStoppingPoint = True
             break
           trade_amount = min(amount, order.amount - order.executed)
-          fee = round_up_to_18_decimal_places(trade_amount * order.price * FEE)
+          fee = round_to_18_decimal_places(trade_amount * order.price * FEE)
           session.add(Trade(user_id=order.user_id, market_id=market.id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
-          session.add(Trade(user_id=user.id, market_id=market.id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=0, timestamp=int(time())))
+          session.add(Trade(user_id=user.id, market_id=market.id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
+          balance.amount -= fee
           matching_user_currency_balance = self.get_balance(session, order.user, currency)
           matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * order.price - fee)
           user_asset_balance = self.get_balance(session, user, asset)
@@ -235,7 +236,9 @@ class Exchange:
             foundStoppingPoint = True
             break
       if amount > 0:
+        fee = round_to_18_decimal_places(amount * order.price * FEE)
         order = Order(user_id=user.id, market_id=market.id, order_type=OrderType.BUY, amount=amount, executed=0, price=price)
+        balance.amount -= fee
         session.add(order)
         session.commit()
         session.commit()
@@ -285,8 +288,8 @@ class Exchange:
             foundStoppingPoint = True
             break
           trade_amount = min(amount, order.amount - order.executed)
-          fee = round_up_to_18_decimal_places(trade_amount * order.price * FEE)
-          session.add(Trade(user_id=order.user_id, market_id=market.id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=0, timestamp=int(time())))
+          fee = round_to_18_decimal_places(trade_amount * order.price * FEE)
+          session.add(Trade(user_id=order.user_id, market_id=market.id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
           session.add(Trade(user_id=user.id, market_id=market.id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
           matching_user_currency_balance = self.get_balance(session, order.user, asset)
           matching_user_currency_balance.amount += trade_amount
@@ -327,12 +330,12 @@ class Exchange:
         session.commit()
         session.commit()
         return {'error': 'Order not found'}
-      [asset] = session.query(Asset).where(Asset.name == ('XMR' if order.order_type == OrderType.SELL else 'BTC'))
+      asset = order.market.asset if order.order_type == OrderType.SELL else order.market.currency
       balance = self.get_balance(session, order.user, asset)
       if order.order_type == OrderType.SELL:
         balance.amount += order.amount - order.executed
       else:
-        balance.amount += round_to_18_decimal_places((order.amount - order.executed) * order.price)
+        balance.amount += round_to_18_decimal_places((order.amount - order.executed) * order.price * (1 + FEE))
       session.delete(order)
       session.commit()
       session.commit()
