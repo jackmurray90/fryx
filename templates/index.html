@@ -89,11 +89,11 @@
     if (order_type == 'buy') {
       document.getElementsByName('withdrawal_address')[0].placeholder = 'Your XMR address';
       document.getElementsByName('refund_address')[0].placeholder = 'Your BTC refund address';
-      document.getElementById('action').value = 'Buy Monero';
+      document.getElementById('action').value = 'Buy XMR';
     } else {
       document.getElementsByName('withdrawal_address')[0].placeholder = 'Your BTC address';
       document.getElementsByName('refund_address')[0].placeholder = 'Your XMR refund address';
-      document.getElementById('action').value = 'Sell Monero';
+      document.getElementById('action').value = 'Sell XMR';
     }
   }
 </script>
@@ -118,6 +118,6 @@
   <input type="hidden" name="market" value="XMRBTC"/>
   <p><input name="withdrawal_address" size="100" placeholder="Your withdrawal address"/></p>
   <p><input name="refund_address" size="100" placeholder="Your refund address"/></p>
-  <p><input type="Submit" id="action" value="Buy Monero"/></p>
+  <p><input type="Submit" id="action" value="Buy/Sell XMR"/></p>
 </form>
 </body>
