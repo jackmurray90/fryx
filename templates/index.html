@@ -52,7 +52,7 @@
           break;
         }
       }
-      approximate_cost = approximate_cost.add(new Decimal('0.00001'));
+      approximate_cost = approximate_cost.mul(new Decimal('1.002')).add(new Decimal('0.00001'));
       if (amount.eq(new Decimal(0))) {
         document.getElementById('result').innerHTML =
           `<p>This will cost approximately ${approximate_cost.toFixed(8, Decimal.ROUND_UP)} BTC.</p>`;
