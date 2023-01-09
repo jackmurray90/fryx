@@ -55,11 +55,11 @@
       approximate_cost = approximate_cost.add(new Decimal('0.00001'));
       if (amount.eq(new Decimal(0))) {
         document.getElementById('result').innerHTML =
-          `<p>This will cost approximate_costly ${approximate_cost.toFixed(8, Decimal.ROUND_UP)} BTC.</p>`;
+          `<p>This will cost approximately ${approximate_cost.toFixed(8, Decimal.ROUND_UP)} BTC.</p>`;
       } else {
         document.getElementById('result').innerHTML =
           `<p>We can only exchange ${amount_exchanged.toFixed(12, Decimal.ROUND_DOWN)} XMR at the moment.</p>` +
-          `<p>This will cost approximate_costly ${approximate_cost.toFixed(8, Decimal.ROUND_UP)} BTC.</p>`;
+          `<p>This will cost approximately ${approximate_cost.toFixed(8, Decimal.ROUND_UP)} BTC.</p>`;
       }
     } else {
       let approximate_value = new Decimal('0');
