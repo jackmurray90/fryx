@@ -46,7 +46,7 @@
         break;
       }
     }
-    approximate_value = approximate_value.sub(new Decimal('0.0001'));
+    approximate_value = approximate_value.mul(new Decimal('0.998')).sub(new Decimal('0.0001'));
     if (amount.eq(new Decimal(0))) {
       document.getElementById('result').innerHTML =
         `<p>This has value of approximately ${approximate_value.toFixed(8, Decimal.ROUND_UP)} BTC.</p>`;
