@@ -15,6 +15,19 @@ class Asset(Base):
   name = Column(String)
   height = Column(Integer)
 
+class Market(Base):
+  __tablename__ == 'markets'
+
+  id = Column(Integer, primary_key=True)
+  name = Column(String)
+  asset_id = Column(Integer, ForeignKey('assets.id'))
+  currency_id = Column(Integer, ForeignKey('assets.id'))
+
+  asset = relationship('Asset', foreign_keys=[asset_id])
+  currency = relationship('Asset', foreign_keys=[currency_id])
+  orders = relationship('Order')
+  trades = relationship('Trade')
+
 class User(Base):
   __tablename__ = 'users'
 
@@ -57,18 +70,21 @@ class Order(Base):
 
   id = Column(Integer, primary_key=True)
   user_id = Column(Integer, ForeignKey('users.id'))
+  market_id = Column(Integer, ForeignKey('markets.id'))
   order_type = Column(Enum(OrderType))
   amount = Column(Numeric(28, 18))
   executed = Column(Numeric(28, 18))
   price = Column(Numeric(28, 18))
 
   user = relationship('User', back_populates='orders')
+  market = relationship('Market', back_populates='orders')
 
 class Trade(Base):
   __tablename__ = 'trades'
 
   id = Column(Integer, primary_key=True)
   user_id = Column(Integer, ForeignKey('users.id'))
+  market_id = Column(Integer, ForeignKey('markets.id'))
   timestamp = Column(Integer)
   order_type = Column(Enum(OrderType))
   amount = Column(Numeric(28, 18))
@@ -76,6 +92,7 @@ class Trade(Base):
   fee = Column(Numeric(28, 18))
 
   user = relationship('User', back_populates='trades')
+  market = relationship('Market', back_populates='trades')
 
 class RateLimit(Base):
   __tablename__ = 'ratelimit'
@@ -87,12 +104,14 @@ class AutoOrder(Base):
   __tablename__ = 'autos'
 
   id = Column(String, primary_key=True)
+  market_id = Column(Integer, ForeignKey('markets.id'))
   order_type = Column(Enum(OrderType))
   deposit_address = Column(String, unique=True)
   withdrawal_address = Column(String, unique=True)
   refund_address = Column(String)
 
   deposits = relationship('AutoDeposit')
+  market = relationship('Market')
 
 class AutoDeposit(Base):
   __tablename__ = 'autodeposits'

@@ -63,11 +63,12 @@
 <p><input id="amount" placeholder="Amount of Monero"/> <button onClick="calculate()">Calculate approximate cost</button></p>
 <div id="result"></div>
 <p>If we can't fulfil your entire order, we will refund the amount that was not exchanged.</p>
-{% for error in errors %}
+{% if error %}
   <p>{{ error }}</p>
-{% endfor %}
+{% endif %}
 <form action="/" method="post">
-  <p><input name="monero_address" size="100" placeholder="Your Monero address"/></p>
-  <p><input name="bitcoin_address" size="100" placeholder="Your Refund Bitcoin address"/></p>
+  <input type="hidden" name="market" value="XMRBTC"/>
+  <p><input name="withdrawal_address" size="100" placeholder="Your Monero address"/></p>
+  <p><input name="refund_address" size="100" placeholder="Your Refund Bitcoin address"/></p>
   <p><input type="Submit" value="Buy Monero"/></p>
 </form>

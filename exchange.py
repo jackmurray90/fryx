@@ -139,42 +139,45 @@ class Exchange:
         return {'error': 'api_key not found'}
       return dict([(asset.name, self.get_balance(session, user, asset).amount) for asset in session.query(Asset).all()])
 
-  def orders(self, api_key, market):
+  def orders(self, api_key, market_name):
     if api_key == 'auto': return {'error': 'Invalid api_key'}
-    if market != 'XMRBTC':
-      return {'error': 'The only market supported is XMRBTC'}
     with Session(self.engine) as session:
       try:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
         return {'error': 'api_key not found'}
+      try:
+        [market] = session.query(Market).where(Market.name == market_name)
+      except:
+        return {'error': 'Market not found'}
       return [{
           'id': order.id,
           'type': 'buy' if order.order_type == OrderType.BUY else 'sell',
           'amount': order.amount,
           'executed': order.executed,
           'price': order.price
-        } for order in user.orders]
+        } for order in session.query(Order).where((Order.user_id == user.id) & (Order.market_id == market.id))]
 
-  def trades(self, api_key, market):
+  def trades(self, api_key, market_name):
     if api_key == 'auto': return {'error': 'Invalid api_key'}
-    if market != 'XMRBTC':
-      return {'error': 'The only market supported is XMRBTC'}
     with Session(self.engine) as session:
       try:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
         return {'error': 'api_key not found'}
+      try:
+        [market] = session.query(Market).where(Market.name == market_name)
+      except:
+        return {'error': 'Market not found'}
       return [{
           'type': 'buy' if trade.order_type == OrderType.BUY else 'sell',
           'amount': trade.amount,
-          'price': trade.price
-        } for trade in user.trades]
+          'price': trade.price,
+          'fee': trade.fee
+        } for trade in session.query(Trade).where((Trade.user_id == user.id) & (Trade.market_id == market.id))]
 
-  def buy(self, api_key, market, amount, price):
+  def buy(self, api_key, market_name, amount, price):
     if api_key == 'auto': return {'error': 'Invalid api_key'}
-    if market != 'XMRBTC':
-      return {'error': 'The only market supported is XMRBTC'}
     if not is_valid(amount):
       return {'error': 'Invalid amount'}
     if not is_valid(price):
@@ -184,8 +187,12 @@ class Exchange:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
         return {'error': 'api_key not found'}
-      [asset] = session.query(Asset).where(Asset.name == 'XMR')
-      [currency] = session.query(Asset).where(Asset.name == 'BTC')
+      try:
+        [market] = session.query(Market).where(Market.name == market_name)
+      except:
+        return {'error': 'Market not found'}
+      asset = market.asset
+      currency = market.currency
       session.begin_nested()
       session.execute('LOCK TABLE orders IN ACCESS EXCLUSIVE MODE;')
       balance = self.get_balance(session, user, currency)
@@ -197,7 +204,8 @@ class Exchange:
       foundStoppingPoint = False
       while not foundStoppingPoint:
         orders = session.query(Order).where(
-            Order.order_type == OrderType.SELL
+            (Order.market_id == market.id) &
+            (Order.order_type == OrderType.SELL)
           ).order_by(
             Order.price.asc(),
             Order.id.asc()
@@ -210,8 +218,8 @@ class Exchange:
             break
           trade_amount = min(amount, order.amount - order.executed)
           fee = round_up_to_18_decimal_places(trade_amount * order.price * FEE)
-          session.add(Trade(user_id=order.user_id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
-          session.add(Trade(user_id=user.id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=0, timestamp=int(time())))
+          session.add(Trade(user_id=order.user_id, market_id=market.id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
+          session.add(Trade(user_id=user.id, market_id=market.id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=0, timestamp=int(time())))
           matching_user_currency_balance = self.get_balance(session, order.user, currency)
           matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * order.price - fee)
           user_asset_balance = self.get_balance(session, user, asset)
@@ -227,7 +235,7 @@ class Exchange:
             foundStoppingPoint = True
             break
       if amount > 0:
-        order = Order(user_id=user.id, order_type=OrderType.BUY, amount=amount, executed=0, price=price)
+        order = Order(user_id=user.id, market_id=market.id, order_type=OrderType.BUY, amount=amount, executed=0, price=price)
         session.add(order)
         session.commit()
         session.commit()
@@ -238,8 +246,6 @@ class Exchange:
 
   def sell(self, api_key, market, amount, price):
     if api_key == 'auto': return {'error': 'Invalid api_key'}
-    if market != 'XMRBTC':
-      return {'error': 'The only market supported is XMRBTC'}
     if not is_valid(amount):
       return {'error': 'Invalid amount'}
     if not is_valid(price):
@@ -249,8 +255,12 @@ class Exchange:
         [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
       except:
         return {'error': 'api_key not found'}
-      [asset] = session.query(Asset).where(Asset.name == 'XMR')
-      [currency] = session.query(Asset).where(Asset.name == 'BTC')
+      try:
+        [market] = session.query(Market).where(Market.name == market_name)
+      except:
+        return {'error': 'Market not found'}
+      asset = market.asset
+      currency = market.currency
       session.begin_nested()
       session.execute('LOCK TABLE orders IN ACCESS EXCLUSIVE MODE;')
       balance = self.get_balance(session, user, asset)
@@ -262,7 +272,8 @@ class Exchange:
       foundStoppingPoint = False
       while not foundStoppingPoint:
         orders = session.query(Order).where(
-            Order.order_type == OrderType.BUY
+            (Order.market_id == market.id) &
+            (Order.order_type == OrderType.BUY)
           ).order_by(
             Order.price.desc(),
             Order.id.asc()
@@ -275,8 +286,8 @@ class Exchange:
             break
           trade_amount = min(amount, order.amount - order.executed)
           fee = round_up_to_18_decimal_places(trade_amount * order.price * FEE)
-          session.add(Trade(user_id=order.user_id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=0, timestamp=int(time())))
-          session.add(Trade(user_id=user.id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
+          session.add(Trade(user_id=order.user_id, market_id=market.id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=0, timestamp=int(time())))
+          session.add(Trade(user_id=user.id, market_id=market.id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
           matching_user_currency_balance = self.get_balance(session, order.user, asset)
           matching_user_currency_balance.amount += trade_amount
           user_asset_balance = self.get_balance(session, user, currency)
@@ -292,7 +303,7 @@ class Exchange:
             foundStopppingPoint = True
             break
       if amount > 0:
-        order = Order(user_id=user.id, order_type=OrderType.SELL, amount=amount, executed=0, price=price)
+        order = Order(user_id=user.id, market_id=market.id, order_type=OrderType.SELL, amount=amount, executed=0, price=price)
         session.add(order)
         session.commit()
         session.commit()
@@ -327,21 +338,49 @@ class Exchange:
       session.commit()
       return {'success': True}
 
-  def auto(self, order_type, address, refund_address):
+  def auto_buy(self, market_name, address, refund_address):
     with Session(self.engine) as session:
       try:
-        deposit_address = assets['XMR' if order_type == OrderType.SELL else 'BTC'].get_new_deposit_address()
-        auto_order = AutoOrder(id=self.random_128_bit_string(), order_type=order_type, withdrawal_address=address, deposit_address=deposit_address, refund_address=refund_address)
-        session.add(auto_order)
-        session.commit()
-        return auto_order.id
+        [market] = session.query(Market).where(Market.name == market_name)
       except:
-        return None
+        return {'error': 'Market not found'}
+      if not assets[market.currency.name].validate_address(refund_address):
+        return {'error': 'Invallid ' + market.currency.name + ' address.'}
+      if not assets[market.asset.name].validate_address(address):
+        return {'error': 'Invallid ' + market.asset.name + ' address.'}
+      deposit_address = assets[market.currency.name].get_new_deposit_address()
+      try:
+        auto_order = AutoOrder(id=self.random_128_bit_string(), market_id=market.id, order_type=OrderType.BUY, withdrawal_address=address, deposit_address=deposit_address, refund_address=refund_address)
+      except:
+        return {'error': 'One of your addresses has been used on this site before. Please use new addresses.'}
+      session.add(auto_order)
+      session.commit()
+      return auto_order.id
+
+  def auto_sell(self, market_name, address, refund_address):
+    with Session(self.engine) as session:
+      try:
+        [market] = session.query(Market).where(Market.name == market_name)
+      except:
+        return {'error': 'Market not found'}
+      if not assets[market.asset.name].validate_address(refund_address):
+        return {'error': 'Invallid ' + market.asset.name + ' address.'}
+      if not assets[market.currency.name].validate_address(address):
+        return {'error': 'Invallid ' + market.currency.name + ' address.'}
+      deposit_address = assets[market.asset.name].get_new_deposit_address()
+      try:
+        auto_order = AutoOrder(id=self.random_128_bit_string(), market_id=market.id, order_type=OrderType.SELL, withdrawal_address=address, deposit_address=deposit_address, refund_address=refund_address)
+      except:
+        return {'error': 'One of your addresses has been used on this site before. Please use new addresses.'}
+      session.add(auto_order)
+      session.commit()
+      return auto_order.id
 
   def get_auto(self, id):
     with Session(self.engine) as session:
       try:
         [auto] = session.query(AutoOrder).where(AutoOrder.id == id)
       except:
-        return None, [], []
-      return auto.deposit_address, assets['XMR' if auto.order_type == OrderType.SELL else 'BTC'].get_unconfirmed_transactions(auto.deposit_address), [d.amount for d in reversed(auto.deposits)]
+        return None
+      asset = assets[auto.market.asset.name if auto.order_type == OrderType.SELL else auto.market.currency.name]
+      return auto.deposit_address, asset.get_unconfirmed_transactions(auto.deposit_address), [d.amount for d in reversed(auto.deposits)]

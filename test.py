@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 from assets import assets
 from exchange import Exchange
 from sqlalchemy import create_engine
-from db import Base, Asset
+from db import Base, Market, Asset
 from sqlalchemy.orm import Session
 from mock_blockchain import MockBlockchain
 from time import sleep
@@ -17,8 +17,7 @@ def fresh_exchange():
   Base.metadata.create_all(engine)
   blockchain_monitor.stop()
   session = Session(engine)
-  session.add(Asset(name='XMR', height=0))
-  session.add(Asset(name='BTC', height=0))
+  session.add(Market(name='XMRBTC', asset=Asset(name='XMR', height=0), currency=Asset(name='BTC', height=0)))
   session.commit()
   assets['BTC'] = MockBlockchain(8)
   assets['XMR'] = MockBlockchain(12)

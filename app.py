@@ -36,58 +36,44 @@ def api():
   return render_template('api.html')
 
 @app.route('/', methods=['GET', 'POST'])
-def xmr_buy():
+def auto_buy():
   rate_limit(ip=True)
   log_referrer()
-  if not 'monero_address' in request.form:
+  if not 'asset_address' in request.form:
     return render_template('buy.html')
-  errors = []
-  if not assets['BTC'].validate_address(request.form['bitcoin_address']):
-    errors.append('Invalid bitcoin address.')
-  if not assets['XMR'].validate_address(request.form['monero_address']):
-    errors.append('Invalid monero address.')
-  if errors:
-    return render_template('buy.html', errors=errors)
-  auto = exchange.auto(OrderType.BUY, request.form['monero_address'], request.form['bitcoin_address'])
-  if not auto:
-    errors = ['One of your addresses has been used on this site before. Please use a new addresses.']
-    return render_template('buy.html', errors=errors)
-  return redirect('/xmr/buy/%s' % auto)
+  auto = exchange.auto_buy(request.form['market'], request.form['asset_address'], request.form['refund_address'])
+  if 'error' in auto:
+    return render_template('buy.html', error=auto['error'])
+  return redirect('/auto/buy/%s' % auto['id'])
 
-@app.route('/xmr/sell', methods=['GET', 'POST'])
-def xmr_sell():
+@app.route('/auto/sell', methods=['GET', 'POST'])
+def auto_sell():
   rate_limit(ip=True)
   log_referrer()
-  if not 'bitcoin_address' in request.form:
+  if not 'asset_address' in request.form:
     return render_template('sell.html')
-  errors = []
-  if not assets['BTC'].validate_address(request.form['bitcoin_address']):
-    errors.append('Invalid bitcoin address.')
-  if not assets['XMR'].validate_address(request.form['monero_address']):
-    errors.append('Invalid monero address.')
-  if errors:
-    return render_template('sell.html', errors=errors)
-  auto = exchange.auto(OrderType.SELL, request.form['bitcoin_address'], request.form['monero_address'])
-  if not auto:
-    errors = ['One of your addresses has been used on this site before. Please use a new addresses.']
-    return render_template('buy.html', errors=errors)
-  return redirect('/xmr/sell/%s' % auto)
+  auto = exchange.auto_sell(request.form['market'], request.form['asset_address'], request.form['refund_address'])
+  if 'error' in auto:
+    return render_template('sell.html', error=auto['error'])
+  return redirect('/auto/sell/%s' % auto['id'])
 
-@app.get('/xmr/buy/<id>')
-def xmr_buy_id(id):
+@app.get('/auto/buy/<id>')
+def auto_buy_id(id):
   rate_limit(ip=True)
-  auto, unconfirmed_transactions, confirmed_deposits = exchange.get_auto(id)
-  if not auto:
+  try:
+    address, unconfirmed_transactions, confirmed_deposits = exchange.get_auto(id)
+  except:
     abort(404)
-  return render_template('xmr_buy.html', address=auto, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits)
+  return render_template('auto_buy.html', address=address, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits)
 
-@app.get('/xmr/sell/<id>')
+@app.get('/auto/sell/<id>')
 def xmr_sell_id(id):
   rate_limit(ip=True)
-  auto, unconfirmed_transactions, confirmed_deposits = exchange.get_auto(id)
-  if not auto:
+  try:
+    address, unconfirmed_transactions, confirmed_deposits = exchange.get_auto(id)
+  except:
     abort(404)
-  return render_template('xmr_sell.html', address=auto, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits)
+  return render_template('auto_sell.html', address=address, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits)
 
 @app.route('/order_book')
 def order_book():
