@@ -5,6 +5,7 @@
   input, button { background-color: #111; border: 1px solid #777; color: #fff; padding: 0.5em; }
   a, a:hover, a:visited { color: rgb(236, 103, 44); text-decoration: none; }
   strong { padding: 0.5em; border: 1px solid rgb(236, 103, 44); }
+  strong.dark { border: 1px solid rgb(118, 52, 22); }
   img { vertical-align: middle; }
   #nav a { padding: 0 2em; }
 </style>
@@ -72,8 +73,8 @@
   <p>Waiting for transaction... <img src="/loading.gif" width="32px"/></p>
 {% endif %}
 {% for transaction in unconfirmed_transactions %}
-  <p><strong>Receiving {{ transaction['amount']|format_decimal(12) }} XMR, {{ transaction['confirmations'] }}/25 confirmations.</strong> &nbsp;<img src="/loading.gif" width="32px"/></p>
+  <p><strong class="dark">Receiving {{ transaction['amount']|format_decimal(12) }} XMR, {{ transaction['confirmations'] }}/25 confirmations.</strong> &nbsp;<img src="/loading.gif" width="32px"/></p>
 {% endfor %}
 {% for amount in confirmed_deposits %}
-  <p><strong>Received {{ amount|format_decimal(12) }} XMR, 25/25 confirmations.</strong></p>
+  <p><strong class="dark">Received {{ amount|format_decimal(12) }} XMR, 25/25 confirmations.</strong></p>
 {% endfor %}
