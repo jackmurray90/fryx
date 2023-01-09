@@ -62,7 +62,7 @@ def auto_buy_id(id):
   return render_template('auto_buy.html', address=address, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits)
 
 @app.get('/auto/sell/<id>')
-def xmr_sell_id(id):
+def auto_sell_id(id):
   rate_limit(ip=True)
   try:
     address, unconfirmed_transactions, confirmed_deposits = exchange.get_auto(id)
