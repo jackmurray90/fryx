@@ -335,7 +335,8 @@ class Exchange:
       if order.order_type == OrderType.SELL:
         balance.amount += order.amount - order.executed
       else:
-        balance.amount += round_to_18_decimal_places((order.amount - order.executed) * order.price * (1 + FEE))
+        balance.amount += round_to_18_decimal_places((order.amount - order.executed) * order.price)
+        balance.amount += round_to_18_decimal_places((order.amount - order.exexcuted) * FEE)
       session.delete(order)
       session.commit()
       session.commit()
