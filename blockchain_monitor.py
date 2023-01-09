@@ -99,7 +99,7 @@ class BlockchainMonitor:
             session.add(Trade(user_id=user.id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
             matching_user_currency_balance = self.get_balance(session, order.user, currency)
             matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * order.price * (1 - FEE))
-            withdrawal_amount += round_to_18_decimal_places(trade_amount * (1 - FEE))
+            withdrawal_amount += trade_amount
             amount = max(0, amount - round_up_to_18_decimal_places(trade_amount * order.price))
           else:
             trade_amount = min(amount, order.amount - order.executed)
@@ -107,7 +107,7 @@ class BlockchainMonitor:
             session.add(Trade(user_id=order.user_id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
             session.add(Trade(user_id=user.id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
             matching_user_currency_balance = self.get_balance(session, order.user, asset)
-            matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * (1 - FEE))
+            matching_user_currency_balance.amount += trade_amount
             withdrawal_amount += round_to_18_decimal_places(trade_amount * order.price * (1 - FEE))
             amount -= trade_amount
           order.executed += trade_amount
