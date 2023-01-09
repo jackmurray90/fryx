@@ -68,8 +68,9 @@
 <p>Your deposit address is:</p>
 <p><strong>{{ address }}</strong></p>
 <p>As soon as we receive a deposit, we will exchange it and send the result to the address you provided.</p>
-<p>Please allow 5 blocks confirmation time for Bitcoin.</p>
-<p>This page will automatically update listing unconfirmed transactions.</p>
+{% if not unconfirmed_transactions and not confirmed_deposits %}
+  <p>This page will automatically update listing unconfirmed transactions.</p>
+{% endif %}
 {% for transaction in unconfirmed_transactions %}
   <p><strong>Receiving {{ transaction['amount']|format_decimal(8) }} BTC, {{ transaction['confirmations'] }}/5 confirmations.</strong></p>
 {% endfor %}
