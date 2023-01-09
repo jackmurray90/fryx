@@ -40,22 +40,17 @@ def auto_buy():
   rate_limit(ip=True)
   log_referrer()
   if not 'asset_address' in request.form:
-    return render_template('buy.html')
-  auto = exchange.auto_buy(request.form['market'], request.form['asset_address'], request.form['refund_address'])
-  if 'error' in auto:
-    return render_template('buy.html', error=auto['error'])
-  return redirect('/auto/buy/%s' % auto['id'])
-
-@app.route('/auto/sell', methods=['GET', 'POST'])
-def auto_sell():
-  rate_limit(ip=True)
-  log_referrer()
-  if not 'asset_address' in request.form:
-    return render_template('sell.html')
-  auto = exchange.auto_sell(request.form['market'], request.form['asset_address'], request.form['refund_address'])
-  if 'error' in auto:
-    return render_template('sell.html', error=auto['error'])
-  return redirect('/auto/sell/%s' % auto['id'])
+    return render_template('index.html')
+  if request.form['type'] == 'buy':
+    auto = exchange.auto_buy(request.form['market'], request.form['asset_address'], request.form['refund_address'])
+    if 'error' in auto:
+      return render_template('index.html', order_type='buy', error=auto['error'])
+    return redirect('/auto/buy/%s' % auto['id'])
+  else:
+    auto = exchange.auto_sell(request.form['market'], request.form['asset_address'], request.form['refund_address'])
+    if 'error' in auto:
+      return render_template('index.html', order_type='sell', error=auto['error'])
+    return redirect('/auto/sell/%s' % auto['id'])
 
 @app.get('/auto/buy/<id>')
 def auto_buy_id(id):
