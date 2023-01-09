@@ -16,7 +16,7 @@ class Asset(Base):
   height = Column(Integer)
 
 class Market(Base):
-  __tablename__ == 'markets'
+  __tablename__ = 'markets'
 
   id = Column(Integer, primary_key=True)
   name = Column(String)
