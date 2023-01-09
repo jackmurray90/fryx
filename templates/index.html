@@ -84,19 +84,21 @@
       }
     }
   }
-  function update_placeholders() {
+  function update() {
     const order_type = document.getElementsByName('type')[0].value;
     if (order_type == 'buy') {
       document.getElementsByName('withdrawal_address')[0].placeholder = 'Your XMR address';
       document.getElementsByName('refund_address')[0].placeholder = 'Your BTC refund address';
+      document.getElementById('action').value = 'Buy Monero';
     } else {
       document.getElementsByName('withdrawal_address')[0].placeholder = 'Your BTC address';
       document.getElementsByName('refund_address')[0].placeholder = 'Your XMR refund address';
+      document.getElementById('action').value = 'Sell Monero';
     }
   }
 </script>
 <title>Fryx Finance</title>
-<body onload="update_placeholders()">
+<body onload="update()">
 <p id="nav"><a href="/">Exchange</a> <a href="/api">API Documentation</a></p>
 <h1><img src="/header.png"/></h1>
 <form action="/" method="post">
@@ -116,6 +118,6 @@
   <input type="hidden" name="market" value="XMRBTC"/>
   <p><input name="withdrawal_address" size="100" placeholder="Your withdrawal address"/></p>
   <p><input name="refund_address" size="100" placeholder="Your refund address"/></p>
-  <p><input type="Submit" value="Buy Monero"/></p>
+  <p><input type="Submit" id="action" value="Buy Monero"/></p>
 </form>
 </body>
