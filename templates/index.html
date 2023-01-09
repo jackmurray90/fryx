@@ -20,7 +20,7 @@
     return new Decimal(amount.toFixed(18, Decimal.ROUND_UP));
   }
   async function calculate() {
-    const order_type = document.getElementById('order_type').value;
+    const order_type = document.getElementsByName('type')[0].value;
     document.getElementById('result').innerHTML = '<p>Calculating...</p>';
     let amount = null;
     try {
@@ -84,13 +84,24 @@
       }
     }
   }
+  function update_placeholders() {
+    const order_type = document.getElementsByName('type')[0].value;
+    if (order_type == 'buy') {
+      document.getElementsByName('withdrawal_address')[0].placeholder = 'Your XMR address';
+      document.getElementsByName('refund_address')[0].placeholder = 'Your BTC refund address';
+    } else {
+      document.getElementsByName('withdrawal_address')[0].placeholder = 'Your BTC address';
+      document.getElementsByName('refund_address')[0].placeholder = 'Your XMR refund address';
+    }
+  }
 </script>
 <title>Fryx Finance</title>
+<body onload="update_placeholders()">
 <p id="nav"><a href="/">Buy Monero</a> <a href="/auto/sell">Sell Monero</a> <a href="/api">API Documentation</a></p>
 <h1><img src="/header.png"/></h1>
 <form action="/" method="post">
   <p>
-    <select id="order_type" name="type">
+    <select name="type" onChange='update_placeholders()'>
       <option value="buy"{% if order_type == 'buy' %} selected="selected"{% endif %}>Buy</option>
       <option value="sell"{% if order_type == 'sell' %} selected="selected"{% endif %}>Sell</option>
     </select>
@@ -107,3 +118,4 @@
   <p><input name="refund_address" size="100" placeholder="Your refund address"/></p>
   <p><input type="Submit" value="Buy Monero"/></p>
 </form>
+</body>
