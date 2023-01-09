@@ -70,7 +70,7 @@
 <p><strong>{{ address }}</strong></p>
 <p>As soon as we receive a deposit, we will exchange it and send the result to the address you provided.</p>
 {% if not unconfirmed_transactions and not confirmed_deposits %}
-  <p>Waiting for transaction... <img src="/loading.gif" width="32px"/></p>
+  <p>Waiting for deposit... <img src="/loading.gif" width="32px"/></p>
 {% endif %}
 {% for transaction in unconfirmed_transactions %}
   <p><strong class="dark">Receiving {{ transaction['amount']|format_decimal(12) }} XMR, {{ transaction['confirmations'] }}/25 confirmations.</strong> &nbsp;<img src="/loading.gif" width="32px"/></p>
