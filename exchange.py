@@ -359,7 +359,7 @@ class Exchange:
         return {'error': 'One of your addresses has been used on this site before. Please use new addresses.'}
       session.add(auto_order)
       session.commit()
-      return auto_order.id
+      return {'id': auto_order.id}
 
   def auto_sell(self, market_name, address, refund_address):
     with Session(self.engine) as session:
@@ -378,7 +378,7 @@ class Exchange:
         return {'error': 'One of your addresses has been used on this site before. Please use new addresses.'}
       session.add(auto_order)
       session.commit()
-      return auto_order.id
+      return {'id': auto_order.id}
 
   def get_auto(self, id):
     with Session(self.engine) as session:
