@@ -36,18 +36,18 @@ def api():
   return render_template('api.html')
 
 @app.route('/', methods=['GET', 'POST'])
-def auto_buy():
+def index():
   rate_limit(ip=True)
   log_referrer()
-  if not 'asset_address' in request.form:
+  if not 'withdrawal_address' in request.form:
     return render_template('index.html')
   if request.form['type'] == 'buy':
-    auto = exchange.auto_buy(request.form['market'], request.form['asset_address'], request.form['refund_address'])
+    auto = exchange.auto_buy(request.form['market'], request.form['withdrawal_address'], request.form['refund_address'])
     if 'error' in auto:
       return render_template('index.html', order_type='buy', error=auto['error'])
     return redirect('/auto/buy/%s' % auto['id'])
   else:
-    auto = exchange.auto_sell(request.form['market'], request.form['asset_address'], request.form['refund_address'])
+    auto = exchange.auto_sell(request.form['market'], request.form['withdrawal_address'], request.form['refund_address'])
     if 'error' in auto:
       return render_template('index.html', order_type='sell', error=auto['error'])
     return redirect('/auto/sell/%s' % auto['id'])
