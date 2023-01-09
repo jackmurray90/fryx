@@ -73,6 +73,7 @@ class Trade(Base):
   order_type = Column(Enum(OrderType))
   amount = Column(Numeric(28, 18))
   price = Column(Numeric(28, 18))
+  fee = Column(Numeric(28, 18))
 
   user = relationship('User', back_populates='trades')
 

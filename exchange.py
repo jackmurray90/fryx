@@ -8,6 +8,8 @@ from math import floor, ceil
 from decimal import Decimal
 from secrets import randbits
 
+FEE = Decimal('0.002')
+
 def hash_api_key(api_key):
   return sha256(api_key.encode('utf-8')).hexdigest()
 
@@ -201,12 +203,13 @@ class Exchange:
             foundStoppingPoint = True
             break
           trade_amount = min(amount, order.amount - order.executed)
-          session.add(Trade(user_id=order.user_id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, timestamp=int(time())))
-          session.add(Trade(user_id=user.id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, timestamp=int(time())))
+          fee = round_up_to_18_decimal_places(trade_amount * order.price * FEE)
+          session.add(Trade(user_id=order.user_id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
+          session.add(Trade(user_id=user.id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
           matching_user_currency_balance = self.get_balance(session, order.user, currency)
-          matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * order.price)
+          matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * order.price * (1 - FEE))
           user_asset_balance = self.get_balance(session, user, asset)
-          user_asset_balance.amount += trade_amount
+          user_asset_balance.amount += round_to_18_decimal_places(trade_amount * (1 - FEE))
           order.executed += trade_amount
           amount -= trade_amount
           if order.executed == order.amount:
@@ -264,12 +267,13 @@ class Exchange:
             foundStoppingPoint = True
             break
           trade_amount = min(amount, order.amount - order.executed)
-          session.add(Trade(user_id=order.user_id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, timestamp=int(time())))
-          session.add(Trade(user_id=user.id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, timestamp=int(time())))
+          fee = round_up_to_18_decimal_places(trade_amount * order.price * FEE)
+          session.add(Trade(user_id=order.user_id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
+          session.add(Trade(user_id=user.id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
           matching_user_currency_balance = self.get_balance(session, order.user, asset)
-          matching_user_currency_balance.amount += trade_amount
+          matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * (1 - FEE))
           user_asset_balance = self.get_balance(session, user, currency)
-          user_asset_balance.amount += round_to_18_decimal_places(trade_amount * order.price)
+          user_asset_balance.amount += round_to_18_decimal_places(trade_amount * order.price * (1 - FEE))
           order.executed += trade_amount
           amount -= trade_amount
           if order.executed == order.amount:

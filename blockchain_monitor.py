@@ -4,7 +4,7 @@ from db import Asset, Balance, DepositAddress, AutoOrder, Order, Trade, OrderTyp
 from sqlalchemy import create_engine
 from threading import Thread
 from time import sleep, time
-from exchange import round_to_18_decimal_places, round_up_to_18_decimal_places
+from exchange import round_to_18_decimal_places, round_up_to_18_decimal_places, FEE
 from env import DB
 
 class BlockchainMonitor:
@@ -94,19 +94,21 @@ class BlockchainMonitor:
         for order in orders:
           if auto.order_type == OrderType.BUY:
             trade_amount = min(round_to_18_decimal_places(amount/order.price), order.amount - order.executed)
-            session.add(Trade(user_id=order.user_id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, timestamp=int(time())))
-            session.add(Trade(user_id=user.id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, timestamp=int(time())))
+            fee = round_up_to_18_decimal_places(trade_amount * order.price * FEE)
+            session.add(Trade(user_id=order.user_id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
+            session.add(Trade(user_id=user.id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
             matching_user_currency_balance = self.get_balance(session, order.user, currency)
-            matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * order.price)
-            withdrawal_amount += trade_amount
+            matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * order.price * (1 - FEE))
+            withdrawal_amount += round_to_18_decimal_places(trade_amount * (1 - FEE))
             amount = max(0, amount - round_up_to_18_decimal_places(trade_amount * order.price))
           else:
             trade_amount = min(amount, order.amount - order.executed)
-            session.add(Trade(user_id=order.user_id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, timestamp=int(time())))
-            session.add(Trade(user_id=user.id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, timestamp=int(time())))
+            fee = round_up_to_18_decimal_places(trade_amount * order.price * FEE)
+            session.add(Trade(user_id=order.user_id, order_type=OrderType.BUY, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
+            session.add(Trade(user_id=user.id, order_type=OrderType.SELL, amount=trade_amount, price=order.price, fee=fee, timestamp=int(time())))
             matching_user_currency_balance = self.get_balance(session, order.user, asset)
-            matching_user_currency_balance.amount += trade_amount
-            withdrawal_amount += round_to_18_decimal_places(trade_amount * order.price)
+            matching_user_currency_balance.amount += round_to_18_decimal_places(trade_amount * (1 - FEE))
+            withdrawal_amount += round_to_18_decimal_places(trade_amount * order.price * (1 - FEE))
             amount -= trade_amount
           order.executed += trade_amount
           if order.executed == order.amount:
