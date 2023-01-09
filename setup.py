@@ -9,7 +9,7 @@ if __name__ == '__main__':
   Base.metadata.create_all(engine)
   session = Session(engine)
   session.add(Market(name='XMRBTC',
-    asset=Asset(name='XMR', height=asset['XMR'].height()),
-    currency=Asset(name='BTC', height=asset['BTC'].height())))
+    asset=Asset(name='XMR', height=assets['XMR'].height()),
+    currency=Asset(name='BTC', height=assets['BTC'].height())))
   session.add(User(api_key='auto'))
   session.commit()
