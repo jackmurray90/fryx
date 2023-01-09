@@ -236,7 +236,7 @@ class Exchange:
             foundStoppingPoint = True
             break
       if amount > 0:
-        fee = round_to_18_decimal_places(amount * order.price * FEE)
+        fee = round_to_18_decimal_places(amount * price * FEE)
         order = Order(user_id=user.id, market_id=market.id, order_type=OrderType.BUY, amount=amount, executed=0, price=price)
         balance.amount -= fee
         session.add(order)
