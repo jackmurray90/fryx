@@ -103,7 +103,7 @@
 <h1><img src="/header.png"/></h1>
 <form action="/" method="post">
   <p>
-    <select name="type" onChange='update_placeholders()'>
+    <select name="type" onChange='update()'>
       <option value="buy"{% if order_type == 'buy' %} selected="selected"{% endif %}>Buy</option>
       <option value="sell"{% if order_type == 'sell' %} selected="selected"{% endif %}>Sell</option>
     </select>
