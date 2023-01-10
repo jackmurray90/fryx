@@ -4,7 +4,7 @@ from decimal import Decimal
 from env import BITCOIN
 from time import sleep
 
-MINCONF = 4
+MINCONF = 3
 
 class BTC:
   def height(self):
