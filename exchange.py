@@ -407,7 +407,7 @@ class Exchange:
         if amount == 0:
           hit_maximum = False
           break
-      approximate_cost += Decimal('0.00001') # TODO: make this withdrawal fee calculation portable across markets
+      approximate_cost += Decimal('0.000001') # TODO: make this withdrawal fee calculation portable across markets
       return {'amount': amount_exchanged, 'hit_maximum': hit_maximum, 'cost': approximate_cost}
 
   def calculate_approximate_value(self, market, amount):
