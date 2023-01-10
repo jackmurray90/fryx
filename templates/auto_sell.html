@@ -15,57 +15,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="keywords" content="Monero, Bitcoin, Exchange"/>
 <meta charset="UTF-8"/>
-<script src="/decimal.js"></script>
-<script>
-  function round_to_18_decimal_places(amount) {
-    return new Decimal(amount.toFixed(18, Decimal.ROUND_DOWN));
-  }
-  async function calculate() {
-    document.getElementById('result').innerHTML = '<p>Calculating...</p>';
-    let amount = null;
-    try {
-      amount = new Decimal(document.getElementById("amount").value);
-    } catch (e) {
-      document.getElementById('result').innerHTML = '<p>Please input a decimal amount.</p>';
-      return;
-    }
-    let order_book = null;
-    try {
-      const response = await fetch("/order_book?market=XMRBTC");
-      order_book = await response.json();
-    } catch (e) {
-      document.getElementById('result').innerHTML = '<p>There was an error fetching the exchange rate, please try again.</p>';
-      return;
-    }
-    order_book.buy.sort((a, b) => Decimal.sub(b.price, a.price).toNumber());
-    let approximate_value = new Decimal('0');
-    let amount_exchanged = new Decimal('0');
-    for (let i = 0; i < order_book.buy.length; i++) {
-      const amount_to_exchange = Decimal.min(Decimal.sub(order_book.buy[i].amount, order_book.buy[i].executed), amount);
-      const value = round_to_18_decimal_places(Decimal.mul(order_book.buy[i].price, amount_to_exchange));
-      approximate_value = approximate_value.add(value);
-      amount_exchanged = amount_exchanged.add(amount_to_exchange);
-      amount = amount.sub(amount_to_exchange);
-      if (amount.eq(new Decimal(0))) {
-        break;
-      }
-    }
-    approximate_value = approximate_value.mul(new Decimal('0.998')).sub(new Decimal('0.0001'));
-    if (amount.eq(new Decimal(0))) {
-      document.getElementById('result').innerHTML =
-        `<p>This has value of approximately ${approximate_value.toFixed(8, Decimal.ROUND_UP)} BTC.</p>`;
-    } else {
-      document.getElementById('result').innerHTML =
-        `<p>We can only exchange ${amount_exchanged.toFixed(12, Decimal.ROUND_DOWN)} XMR at the moment.</p>` +
-        `<p>This has value of approximately ${approximate_value.toFixed(8, Decimal.ROUND_UP)} BTC.</p>`;
-    }
-  }
-</script>
 <title>Fryx Finance</title>
 <p id="nav"><a href="/">Exchange</a> <a href="/api">API Documentation</a></p>
 <h1><img src="/header.png"/></h1>
-<p><input id="amount" placeholder="Amount of Monero"/> <button onClick="calculate()">Calculate approximate value</button></p>
-<div id="result"></div>
+<form action="">
+  <p><input name="amount" placeholder="Amount of Monero" value="{{ amount|format_decimal(12) }}"/> <input type="submit" value="Calculate approximate value"/></p>
+</form>
+{% if error %}
+  <p>{{ error }}</p>
+{% endif %}
+{% if hit_maximum %}
+  <p>We can only exchange {{ amount|format_decimal(12) }} XMR at the moment.</p>
+{% endif %}
+{% if approximate_value %}
+  <p>This has value of approximately {{ approximate_value|format_decimal(8) }} BTC.</p>
+{% endif %}
 <p>Your deposit address is:</p>
 <p><strong>{{ address }}</strong></p>
 <p>As soon as we receive a deposit, we will exchange it and send the result to the address you provided.</p>

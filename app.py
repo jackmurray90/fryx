@@ -16,6 +16,8 @@ engine = create_engine(DB)
 
 @app.template_filter()
 def format_decimal(d, decimal_places):
+  if d == None:
+    return ''
   digit = Decimal('10')
   while digit <= d:
     digit *= 10
@@ -56,19 +58,19 @@ def index():
 def auto_buy_id(id):
   rate_limit(ip=True)
   try:
-    address, unconfirmed_transactions, confirmed_deposits = exchange.get_auto(id)
+    address, unconfirmed_transactions, confirmed_deposits, approximate_cost = exchange.get_auto(id, request.args.get('amount'))
   except:
     abort(404)
-  return render_template('auto_buy.html', address=address, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits)
+  return render_template('auto_buy.html', address=address, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits, error=approximate_cost.get('error'), amount=approximate_cost.get('amount'), approximate_cost=approximate_cost.get('cost'), hit_maximum=approximate_cost.get('hit_maximum'))
 
 @app.get('/auto/sell/<id>')
 def auto_sell_id(id):
   rate_limit(ip=True)
   try:
-    address, unconfirmed_transactions, confirmed_deposits = exchange.get_auto(id)
+    address, unconfirmed_transactions, confirmed_deposits, approximate_value = exchange.get_auto(id, request.args.get('amount'))
   except:
     abort(404)
-  return render_template('auto_sell.html', address=address, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits)
+  return render_template('auto_sell.html', address=address, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits, error=approximate_value.get('error'), amount=approximate_value.get('amount'), approximate_value=approximate_value.get('value'), hit_maximum=approximate_value.get('hit_maximum'))
 
 @app.route('/order_book')
 def order_book():

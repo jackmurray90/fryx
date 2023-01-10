@@ -336,7 +336,7 @@ class Exchange:
         balance.amount += order.amount - order.executed
       else:
         balance.amount += round_to_18_decimal_places((order.amount - order.executed) * order.price)
-        balance.amount += round_to_18_decimal_places((order.amount - order.exexcuted) * FEE)
+        balance.amount += round_to_18_decimal_places((order.amount - order.executed) * order.price * FEE)
       session.delete(order)
       session.commit()
       session.commit()
@@ -380,11 +380,57 @@ class Exchange:
       session.commit()
       return {'id': auto_order.id}
 
-  def get_auto(self, id):
+  def get_auto(self, id, amount):
     with Session(self.engine) as session:
       try:
         [auto] = session.query(AutoOrder).where(AutoOrder.id == id)
       except:
         return None
       asset = assets[auto.market.asset.name if auto.order_type == OrderType.SELL else auto.market.currency.name]
-      return auto.deposit_address, asset.get_unconfirmed_transactions(auto.deposit_address), [d.amount for d in reversed(auto.deposits)]
+      return auto.deposit_address, asset.get_unconfirmed_transactions(auto.deposit_address), [d.amount for d in reversed(auto.deposits)], self.calculate_approximate_cost(auto.market, amount) if auto.order_type == OrderType.BUY else self.calculate_approximate_value(auto.market, value)
+
+  def calculate_approximate_cost(self, market, amount):
+    if amount == None:
+      return {}
+    try:
+      amount = Decimal(amount)
+    except:
+      return {'error': 'Please enter a decimal value.'}
+    with Session(self.engine) as session:
+      orders = session.query(Order).where((Order.market_id == market.id) & (Order.order_type == OrderType.SELL)).order_by(Order.price.asc()).all();
+      approximate_cost = Decimal(0)
+      amount_exchanged = Decimal(0)
+      hit_maximum = True
+      for order in orders:
+        amount_to_exchange = min(order.amount - order.executed, amount)
+        approximate_cost += round_up_to_18_decimal_places(order.price * amount_to_exchange * (1 + FEE))
+        amount_exchanged += amount_to_exchange
+        amount -= amount_to_exchange
+        if amount == 0:
+          hit_maximum = False
+          break
+      approximate_cost += Decimal('0.00001') # TODO: make this withdrawal fee calculation portable across markets
+      return {'amount': amount_exchanged, 'hit_maximum': hit_maximum, 'cost': approximate_cost}
+
+  def calculate_approximate_value(self, market, amount):
+    if amount == None:
+      return {}
+    try:
+      amount = Decimal(amount)
+    except:
+      return {'error': 'Please enter a decimal value.'}
+    with Session(self.engine) as session:
+      orders = session.query(Order).where((Order.market_id == market.id) & (Order.order_type == OrderType.BUY)).order_by(Order.price.desc()).all();
+      approximate_value = Decimal(0)
+      amount_exchanged = Decimal(0)
+      hit_maximum = True
+      for order in orders:
+        amount_to_exchange = min(order.amount - order.executed, amount)
+        approximate_value += round_to_18_decimal_places(order.price * amount_to_exchange * (1 - FEE))
+        amount_exchanged += amount_to_exchange
+        amount -= amount_to_exchange
+        if amount == 0:
+          hit_maximum = False
+          break
+      approximate_value -= Decimal('0.0001') # TODO: make this withdrawal fee calculation portable across markets
+      return {'amount': amount_exchanged, 'hit_maximum': hit_maximum, 'value': approximate_value}
