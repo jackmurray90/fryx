@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Trades on {{ market.name }}</h2>
+<h2>Trades for {{ market.name }}</h2>
 <table>
   <tr><th>Timestamp</th><th>Type</th><th>Volume</th><th>Price</th><th>Fee</th></tr>
   {% for trade in trades %}
