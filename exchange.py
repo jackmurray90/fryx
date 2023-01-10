@@ -48,6 +48,8 @@ class Exchange:
     with Session(self.engine) as session:
       try:
         [market] = session.query(Market).where(Market.name == market_name)
+        market.asset
+        market.currency
         return market
       except:
         return False
