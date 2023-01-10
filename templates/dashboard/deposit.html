@@ -1,10 +1,20 @@
 {% extends 'base.html' %}
+{% block head %}
+  <meta http-equiv="refresh" content="20"/>
+{% endblock %}
 {% block content %}
-<h2>Deposit</h2>
-<table>
-  <tr><th>Asset</th><th>Address</th></tr>
-  {% for asset in assets %}
-    <tr><td>{{ asset['name'] }}</td><td>{{ asset['address'] }}</td></tr>
+  <h2>Deposit</h2>
+  <table>
+    <tr><th>Asset</th><th>Address</th></tr>
+    {% for asset in assets %}
+      <tr><td>{{ asset['name'] }}</td><td>{{ asset['address'] }}</td></tr>
+    {% endfor %}
+  </table>
+  <h2>Unconfirmed Deposits</h2>
+  {% if not unconfirmed_deposits %}
+    <p>Waiting for deposits... <img src="/loading.gif" width="32px"/></p>
+  {% endif %}
+  {% for deposit in unconfirmed_deposits %}
+    <p>Receiving {{ deposit['amount']|format_decimal(18) }} {{ deposit['asset_name'] }}, {{ deposit['confirmations'] }}/{{ deposit['required_confirmations'] }} &nbsp;<img src="/loading.gif" width="32px"/></p>
   {% endfor %}
-</table>
 {% endblock %}

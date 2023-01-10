@@ -8,6 +8,7 @@ from rate_limit import rate_limit
 from time import time
 from urllib.parse import quote_plus
 from decimal import Decimal
+from assets import assets
 import re
 
 def dashboard(app, exchange, engine):
@@ -162,19 +163,27 @@ def dashboard(app, exchange, engine):
     rate_limit(engine, ip=True)
     if not logged_in: return redirect('/')
     with Session(engine) as session:
-      assets = [{
-        'name': asset.name,
-        'address': exchange.deposit(logged_in.api_key, asset.name)['address']
-        } for asset in session.query(Asset).all()]
-      return render_template('dashboard/deposit.html', assets=assets, csrf=csrf, logged_in=logged_in)
+      coins = []
+      unconfirmed_deposits = []
+      for asset in session.query(Asset).all():
+        address = exchange.deposit(logged_in.api_key, asset.name)['address']
+        coins.append({'name': asset.name, 'address': address})
+        for deposit in assets[asset.name].get_unconfirmed_transactions(address):
+          unconfirmed_deposits.append({
+            'amount': deposit['amount'],
+            'asset_name': asset.name,
+            'confirmations': deposit['confirmations'],
+            'required_confirmations': assets[asset.name].confirmations()
+          })
+      return render_template('dashboard/deposit.html', assets=coins, unconfirmed_deposits=unconfirmed_deposits, csrf=csrf, logged_in=logged_in)
 
   @get('/dashboard/withdraw')
   def withdraw(csrf, logged_in):
     rate_limit(engine, ip=True)
     if not logged_in: return redirect('/')
     with Session(engine) as session:
-      assets = [asset.name for asset in session.query(Asset).all()]
-      response = make_response(render_template('dashboard/withdraw.html', message=request.cookies.get('message'), assets=assets, csrf=csrf, logged_in=logged_in))
+      coins = [asset.name for asset in session.query(Asset).all()]
+      response = make_response(render_template('dashboard/withdraw.html', message=request.cookies.get('message'), assets=coins, csrf=csrf, logged_in=logged_in))
       response.set_cookie('message', '', expires=0)
       return response
 

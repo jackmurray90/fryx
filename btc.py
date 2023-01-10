@@ -76,3 +76,6 @@ class BTC:
 
   def withdrawal_fee(self):
     return Decimal('0.0001')
+
+  def confirmations(self):
+    return MINCONF + 2
