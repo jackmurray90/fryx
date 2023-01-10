@@ -42,6 +42,6 @@
 {% for amount in confirmed_deposits %}
   <p><strong class="dark">Received {{ amount|format_decimal(12) }} XMR, 25/25 confirmations.</strong></p>
 {% endfor %}
-{% if confirmed_deposits %}
+{% if confirmed_deposits and not unconfirmed_transactions %}
   <p>All done! Your Bitcoin should arrive soon.</p>
 {% endif %}
