@@ -6,10 +6,9 @@ def csrf(app, exchange):
     def decorator(f):
       @app.route(path, endpoint=random_128_bit_string())
       def wrapper(*args, **kwargs):
-        csrf = random_128_bit_string()
-        response = make_response(f(f'<input type="hidden" name="csrf" value="{csrf}"/>', exchange.check_user(request.cookies.get('api_key')), *args, **kwargs))
-        response.set_cookie('csrf', csrf)
-        return response
+        logged_in = exchange.check_user(request.cookies.get('api_key'))
+        api_key = logged_in.api_key if logged_in else ''
+        return f(f'<input type="hidden" name="csrf" value="{api_key}"/>', logged_in, *args, **kwargs)
       return wrapper
     return decorator
 
@@ -17,12 +16,11 @@ def csrf(app, exchange):
     def decorator(f):
       @app.post(path, endpoint=random_128_bit_string())
       def wrapper(*args, **kwargs):
-        if request.form['csrf'] != request.cookies.get('csrf'):
+        logged_in = exchange.check_user(request.cookies.get('api_key'))
+        if logged_in and request.form['csrf'] != logged_in.api_key:
           abort(403)
-        csrf = random_128_bit_string()
-        response = make_response(f(f'<input type="hidden" name="csrf" value="{csrf}"/>', exchange.check_user(request.cookies.get('api_key')), *args, **kwargs))
-        response.set_cookie('csrf', csrf)
-        return response
+        api_key = logged_in.api_key if logged_in else ''
+        return f(f'<input type="hidden" name="csrf" value="{api_key}"/>', logged_in, *args, **kwargs)
       return wrapper
     return decorator
 
