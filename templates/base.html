@@ -2,8 +2,9 @@
 <style>
   html { background-color: #000; color: #fff; }
   body { text-align: center; }
-  table { border-collapse: collapse; margin: 1em auto; }
-  th, td { border: 1px solid #111; padding: 0.5em; }
+  table, .table { display: table; border-collapse: collapse; margin: 1em auto; }
+  .tr { display: table-row; }
+  th, td, .td { display: table-cell; border: 1px solid #111; padding: 0.5em; }
   ul, li { margin: 0; padding: 0; list-style: none; }
   pre { text-align: left; }
   input, button, select { background-color: #111; border: 1px solid #777; color: #fff; padding: 0.5em; }
@@ -34,6 +35,8 @@
   <a href="/dashboard/balances">Balances</a>
   <a href="/dashboard/orders/XMRBTC">Orders</a>
   <a href="/dashboard/trades/XMRBTC">Trades</a>
+  <a href="/dashboard/deposit">Deposit</a>
+  <a href="/dashboard/withdraw">Withdraw</a>
   <a href="/api">API</a>
   <form action="/dashboard/logout" method="post">
     {{ csrf|safe }}

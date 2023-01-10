@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Deposit</h2>
+<table>
+  <tr><th>Asset</th><th>Address</th></tr>
+  {% for asset in assets %}
+    <tr><td>{{ asset['name'] }}</td><td>{{ asset['address'] }}</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

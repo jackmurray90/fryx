@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Withdraw</h2>
+{% if message %}
+  <p>{{ message }}</p>
+{% endif %}
+<div class="table">
+  <div class="tr"><span class="td">Asset</span><span class="td">Address</span><span class="td">Amount</span><span class="td"></span></div>
+  {% for asset in assets %}
+    <form class="tr" action="/dashboard/withdraw/{{asset}}" method="post">
+      {{ csrf|safe }}
+      <span class="td">{{ asset }}</span>
+      <span class="td"><input name="address" size="80" placeholder="Address"/></span>
+      <span class="td"><input name="amount" placeholder="Amount"/></span>
+      <span class="td"><input type="submit" value="Withdraw"/></span>
+    </form>
+  {% endfor %}
+</table>
+{% endblock %}

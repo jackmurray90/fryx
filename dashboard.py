@@ -1,11 +1,13 @@
 from flask import request, abort, render_template, redirect, make_response
 from csrf import csrf
-from db import User, LoginCode
+from db import User, LoginCode, Asset
 from sqlalchemy.orm import Session
 from exchange import random_128_bit_string
 from mail import send_email
 from rate_limit import rate_limit
 from time import time
+from urllib.parse import quote_plus
+from decimal import Decimal
 import re
 
 def dashboard(app, exchange, engine):
@@ -154,3 +156,43 @@ def dashboard(app, exchange, engine):
     market = exchange.check_market(market_name)
     if not market: abort(404)
     return render_template('dashboard/trades.html', market=market, trades=exchange.trades(logged_in.api_key, market_name), csrf=csrf, logged_in=logged_in)
+
+  @get('/dashboard/deposit')
+  def deposit(csrf, logged_in):
+    rate_limit(engine, ip=True)
+    if not logged_in: return redirect('/')
+    with Session(engine) as session:
+      assets = [{
+        'name': asset.name,
+        'address': exchange.deposit(logged_in.api_key, asset.name)['address']
+        } for asset in session.query(Asset).all()]
+      return render_template('dashboard/deposit.html', assets=assets, csrf=csrf, logged_in=logged_in)
+
+  @get('/dashboard/withdraw')
+  def withdraw(csrf, logged_in):
+    rate_limit(engine, ip=True)
+    if not logged_in: return redirect('/')
+    with Session(engine) as session:
+      assets = [asset.name for asset in session.query(Asset).all()]
+      response = make_response(render_template('dashboard/withdraw.html', message=request.cookies.get('message'), assets=assets, csrf=csrf, logged_in=logged_in))
+      response.set_cookie('message', '', expires=0)
+      return response
+
+  @post('/dashboard/withdraw/<asset>')
+  def withdraw(csrf, logged_in, asset):
+    rate_limit(engine, ip=True)
+    if not logged_in: return redirect('/')
+    try:
+      amount = Decimal(request.form['amount'])
+    except:
+      response = make_response(redirect('/dashboard/withdraw'))
+      response.set_cookie('message', 'Invalid amount.')
+      return response
+    result = exchange.withdraw(logged_in.api_key, asset, request.form['address'], amount)
+    if 'error' in result:
+      response = make_response(redirect('/dashboard/withdraw'))
+      response.set_cookie('message', result['error'])
+      return response
+    response = make_response(redirect('/dashboard/withdraw'))
+    response.set_cookie('message', 'Successfully submitted the withdrawal request.')
+    return response
