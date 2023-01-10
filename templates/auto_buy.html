@@ -42,3 +42,6 @@
 {% for amount in confirmed_deposits %}
   <p><strong class="dark">Received {{ amount|format_decimal(8) }} BTC, 5/5 confirmations.</strong></p>
 {% endfor %}
+{% if confirmed_deposits %}
+  <p>All done! Your Monero should arrive soon.</p>
+{% endif %}
