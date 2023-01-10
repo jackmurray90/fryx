@@ -3,6 +3,7 @@
   {% if logged_in %}
     <h2>API Key</h2>
     <p>Your API key is: {{ logged_in.api_key }}</p>
+    <p>Do not share this with anyone.</p>
   {% endif %}
   <h2>API Documentation</h2>
   <p>Requests are rate-limited at 50 requests per second.</p>
