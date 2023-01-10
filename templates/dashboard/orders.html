@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Orders on {{ market.name }}</h2>
+{% if message %}
+  <p>{{ message }}</p>
+{% endif %}
+<form action="/dashboard/orders/{{ market.name }}" method="post">
+  <p>
+    <select name="type">
+      <option value="buy">Buy</option>
+      <option value="sell">Sell</option>
+    </select>
+    <input type="hidden" name="market" value="XMRBTC"/>
+    <input name="volume" placeholder="Volume"/>
+    <input name="price" placeholder="Price"/>
+    {{ csrf|safe }}
+    <input type="submit" value="Place order"/>
+  </p>
+</form>
+<table>
+  <tr><th>Order ID</th><th>Type</th><th>Volume</th><th>Executed</th><th>Price</th></tr>
+  {% for order in orders %}
+    <tr><td>{{ order['id'] }}</td><td>{{ order['type'] }}</td><td>{{ order['volume']|format_decimal(18) }} {{ market.asset.name }}</td><td>{{ order['executed']|format_decimal(18) }} {{ market.asset.name }}</td><td>{{ order['price']|format_decimal(18) }} {{ market.currency.name }}</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

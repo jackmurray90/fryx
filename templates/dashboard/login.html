@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<form action="/dashboard/login" method="post">
+  {% if error %}
+    <p>{{ error }}</p>
+  {% endif %}
+  <p>
+    <input name='email' placeholder="Email address"/>
+    {{ csrf|safe }}
+    <input type="submit" value="Login"/>
+  </p>
+</form>
+{% endblock %}

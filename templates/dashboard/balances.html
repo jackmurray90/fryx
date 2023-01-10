@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<table>
+  <tr><th>Asset</th><th>Balance</th></tr>
+  {% for asset in balances %}
+    <tr><td>{{ asset }}</td><td>{{ balances[asset]|format_decimal(18) }}</tr>
+  {% endfor %}
+</table>
+{% endblock %}

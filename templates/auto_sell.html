@@ -1,47 +1,33 @@
-<!doctype html>
-<style>
-  html { background-color: #000; color: #fff; }
-  body { text-align: center; }
-  input, button { background-color: #111; border: 1px solid #777; color: #fff; padding: 0.5em; }
-  a, a:hover, a:visited { color: rgb(236, 103, 44); text-decoration: none; }
-  strong { padding: 0.5em; border: 1px solid rgb(236, 103, 44); }
-  strong.dark { border: 1px solid rgb(118, 52, 22); }
-  img { vertical-align: middle; }
-  #nav a { padding: 0 2em; }
-</style>
-<meta http-equiv="refresh" content="20"/>
-<meta name="description" content="Monero/Bitcoin cryptocurrency exchange with 0% trading fees. No sign up required."/>
-<meta name=”robots” content="index, follow"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="keywords" content="Monero, Bitcoin, Exchange"/>
-<meta charset="UTF-8"/>
-<title>Fryx Finance</title>
-<p id="nav"><a href="/">Buy Monero</a> <a href="/xmr/sell">Sell Monero</a> <a href="/api">API Documentation</a></p>
-<h1><img src="/header.png"/></h1>
-<form action="">
-  <p><input name="amount" placeholder="Amount of Monero" value="{{ amount|format_decimal(12) }}"/> <input type="submit" value="Calculate approximate value"/></p>
-</form>
-{% if error %}
-  <p>{{ error }}</p>
-{% endif %}
-{% if hit_maximum %}
-  <p>We can only exchange {{ amount|format_decimal(12) }} XMR at the moment.</p>
-{% endif %}
-{% if approximate_value %}
-  <p>This has value of approximately {{ approximate_value|format_decimal(8) }} BTC.</p>
-{% endif %}
-<p>Your deposit address is:</p>
-<p><strong>{{ address }}</strong></p>
-<p>As soon as we receive a deposit, we will exchange it and send the result to the address you provided.</p>
-{% if not unconfirmed_transactions and not confirmed_deposits %}
-  <p>Waiting for deposit... <img src="/loading.gif" width="32px"/></p>
-{% endif %}
-{% for transaction in unconfirmed_transactions %}
-  <p><strong class="dark">Receiving {{ transaction['amount']|format_decimal(12) }} XMR, {{ transaction['confirmations'] }}/25 confirmations.</strong> &nbsp;<img src="/loading.gif" width="32px"/></p>
-{% endfor %}
-{% for amount in confirmed_deposits %}
-  <p><strong class="dark">Received {{ amount|format_decimal(12) }} XMR, 25/25 confirmations.</strong></p>
-{% endfor %}
-{% if confirmed_deposits and not unconfirmed_transactions %}
-  <p>All done! Your Bitcoin should arrive soon.</p>
-{% endif %}
+{% extends 'base.html' %}
+{% block head %}
+  <meta http-equiv="refresh" content="20"/>
+{% endblock %}
+{% block content %}
+  <form action="">
+    <p><input name="amount" placeholder="Amount of Monero" value="{{ amount|format_decimal(12) }}"/> <input type="submit" value="Calculate approximate value"/></p>
+  </form>
+  {% if error %}
+    <p>{{ error }}</p>
+  {% endif %}
+  {% if hit_maximum %}
+    <p>We can only exchange {{ amount|format_decimal(12) }} XMR at the moment.</p>
+  {% endif %}
+  {% if approximate_value %}
+    <p>This has value of approximately {{ approximate_value|format_decimal(8) }} BTC.</p>
+  {% endif %}
+  <p>Your deposit address is:</p>
+  <p><strong>{{ address }}</strong></p>
+  <p>As soon as we receive a deposit, we will exchange it and send the result to the address you provided.</p>
+  {% if not unconfirmed_transactions and not confirmed_deposits %}
+    <p>Waiting for deposit... <img src="/loading.gif" width="32px"/></p>
+  {% endif %}
+  {% for transaction in unconfirmed_transactions %}
+    <p><strong class="dark">Receiving {{ transaction['amount']|format_decimal(12) }} XMR, {{ transaction['confirmations'] }}/25 confirmations.</strong> &nbsp;<img src="/loading.gif" width="32px"/></p>
+  {% endfor %}
+  {% for amount in confirmed_deposits %}
+    <p><strong class="dark">Received {{ amount|format_decimal(12) }} XMR, 25/25 confirmations.</strong></p>
+  {% endfor %}
+  {% if confirmed_deposits and not unconfirmed_transactions %}
+    <p>All done! Your Bitcoin should arrive soon.</p>
+  {% endif %}
+{% endblock %}

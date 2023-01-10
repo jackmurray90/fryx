@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Trades on {{ market.name }}</h2>
+<table>
+  <tr><th>Timestamp</th><th>Type</th><th>Volume</th><th>Price</th><th>Fee</th></tr>
+  {% for trade in trades %}
+    <tr><td>{{ trade['timestamp']|timestamp }}</td><td>{{ trade['type'] }}</td><td>{{ trade['volume']|format_decimal(18) }} {{ market.asset.name }}</td><td>{{ trade['price']|format_decimal(18) }} {{ market.currency.name }}</td><td>{{ trade['fee']|format_decimal(18) }} {{ market.currency.name }}</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

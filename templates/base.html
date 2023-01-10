@@ -1,0 +1,44 @@
+<!doctype html>
+<style>
+  html { background-color: #000; color: #fff; }
+  body { text-align: center; }
+  table { border-collapse: collapse; margin: 1em auto; }
+  th, td { border: 1px solid #111; padding: 0.5em; }
+  ul, li { margin: 0; padding: 0; list-style: none; }
+  pre { text-align: left; }
+  input, button, select { background-color: #111; border: 1px solid #777; color: #fff; padding: 0.5em; }
+  a, a:hover, a:visited { color: rgb(236, 103, 44); text-decoration: none; }
+  #nav a { padding: 0 2em; }
+  #nav form { display: inline; }
+  #nav input { background-color: transparent; border: none; color: rgb(236, 103, 44); padding: 0 2em; cursor: pointer; }
+  strong { padding: 0.5em; border: 1px solid rgb(236, 103, 44); }
+  strong.dark { border: 1px solid rgb(118, 52, 22); }
+  img { vertical-align: middle; }
+</style>
+<meta name="description" content="Monero/Bitcoin cryptocurrency exchange with 0% trading fees. No sign up required."/>
+<meta name=”robots” content="index, follow"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="keywords" content="Monero, Bitcoin, Exchange"/>
+<meta charset="UTF-8"/>
+{% block head %}{% endblock %}
+<title>Fryx Finance</title>
+<div id="nav">
+{% if not logged_in %}
+  <a href="/">Buy Monero</a>
+  <a href="/xmr/sell">Sell Monero</a>
+  <a href="/api">API</a>
+  <a href="/dashboard/new_user">Register</a>
+  <a href="/dashboard/login">Log In</a>
+{% else %}
+  <a href="/dashboard/balances">Balances</a>
+  <a href="/dashboard/orders/XMRBTC">Orders</a>
+  <a href="/dashboard/trades/XMRBTC">Trades</a>
+  <a href="/api">API</a>
+  <form action="/dashboard/logout" method="post">
+    {{ csrf|safe }}
+    <input type="submit" value="Logout"/>
+  </form>
+{% endif %}
+</div>
+<h1><img src="/header.png"/></h1>
+{% block content %}{% endblock %}

@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Integer, Numeric, Enum, Column, String, ForeignKey, UniqueConstraint
+from sqlalchemy import Integer, Numeric, Enum, Column, String, ForeignKey, UniqueConstraint, Boolean
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -33,6 +33,9 @@ class User(Base):
 
   id = Column(Integer, primary_key=True)
   api_key = Column(String)
+  email = Column(String)
+  email_verification_code = Column(String)
+  email_verified = Column(Boolean, default=False)
 
   balances = relationship('Balance')
   orders = relationship('Order')
@@ -125,3 +128,11 @@ class Referrer(Base):
 
   hostname = Column(String, primary_key=True)
   count = Column(Integer)
+
+class LoginCode(Base):
+  __tablename__ = 'login_codes'
+
+  code = Column(String, primary_key=True)
+  user_id = Column(Integer, ForeignKey('users.id'))
+  expiry = Column(Integer)
+  user = relationship('User')

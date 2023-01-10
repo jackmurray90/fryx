@@ -10,9 +10,6 @@ from secrets import randbits
 
 FEE = Decimal('0.002')
 
-def hash_api_key(api_key):
-  return sha256(api_key.encode('utf-8')).hexdigest()
-
 def round_to_18_decimal_places(amount):
   return floor(amount * 10**18) / Decimal(10**18)
 
@@ -22,29 +19,38 @@ def round_up_to_18_decimal_places(amount):
 def is_valid(amount):
   return amount > 0 and not amount.is_nan() and round_to_18_decimal_places(amount) == amount
 
+def random_128_bit_string():
+  num = randbits(128)
+  arr = []
+  arr_append = arr.append
+  _divmod = divmod
+  ALPHABET = "23456789abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
+  base = len(ALPHABET)
+  while num:
+    num, rem = _divmod(num, base)
+    arr_append(ALPHABET[rem])
+  return ''.join(arr)
+
 class Exchange:
   def __init__(self, db):
     self.engine = create_engine(db)
 
   def check_user(self, api_key):
+    if api_key == 'auto': return False
     with Session(self.engine) as session:
       try:
-        [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
-        return True
+        [user] = session.query(User).where(User.api_key == api_key)
+        return user
       except:
         return False
 
-  def random_128_bit_string(self):
-    num = randbits(128)
-    arr = []
-    arr_append = arr.append
-    _divmod = divmod
-    ALPHABET = "23456789abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
-    base = len(ALPHABET)
-    while num:
-      num, rem = _divmod(num, base)
-      arr_append(ALPHABET[rem])
-    return ''.join(arr)
+  def check_market(self, market_name):
+    with Session(self.engine) as session:
+      try:
+        [market] = session.query(Market).where(Market.name == market_name)
+        return market
+      except:
+        return False
 
   def get_balance(self, session, user, asset):
     try:
@@ -63,19 +69,19 @@ class Exchange:
     with Session(self.engine) as session:
       orders = session.query(Order).all()
       return {'buy': [{
-          'amount': order.amount,
+          'volume': order.amount,
           'executed': order.executed,
           'price': order.price
           } for order in orders if order.order_type == OrderType.BUY],
         'sell': [{
-          'amount': order.amount,
+          'volume': order.amount,
           'executed': order.executed,
           'price': order.price
           } for order in orders if order.order_type == OrderType.SELL]}
 
   def new_user(self):
-    api_key = self.random_128_bit_string()
-    user = User(api_key=hash_api_key(api_key))
+    api_key = random_128_bit_string()
+    user = User(api_key=api_key)
     with Session(self.engine) as session:
       session.add(user)
       session.commit()
@@ -85,7 +91,7 @@ class Exchange:
     if api_key == 'auto': return {'error': 'Invalid api_key'}
     with Session(self.engine) as session:
       try:
-        [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
+        [user] = session.query(User).where(User.api_key == api_key)
       except:
         return {'error': 'api_key not found'}
       try:
@@ -108,7 +114,7 @@ class Exchange:
     if api_key == 'auto': return {'error': 'Invalid api_key'}
     with Session(self.engine) as session:
       try:
-        [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
+        [user] = session.query(User).where(User.api_key == api_key)
       except:
         return {'error': 'api_key not found'}
       try:
@@ -134,7 +140,7 @@ class Exchange:
     if api_key == 'auto': return {'error': 'Invalid api_key'}
     with Session(self.engine) as session:
       try:
-        [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
+        [user] = session.query(User).where(User.api_key == api_key)
       except:
         return {'error': 'api_key not found'}
       return dict([(asset.name, self.get_balance(session, user, asset).amount) for asset in session.query(Asset).all()])
@@ -143,7 +149,7 @@ class Exchange:
     if api_key == 'auto': return {'error': 'Invalid api_key'}
     with Session(self.engine) as session:
       try:
-        [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
+        [user] = session.query(User).where(User.api_key == api_key)
       except:
         return {'error': 'api_key not found'}
       try:
@@ -152,17 +158,17 @@ class Exchange:
         return {'error': 'Market not found'}
       return [{
           'id': order.id,
-          'type': 'buy' if order.order_type == OrderType.BUY else 'sell',
-          'amount': order.amount,
+          'type': 'Buy' if order.order_type == OrderType.BUY else 'Sell',
+          'volume': order.amount,
           'executed': order.executed,
           'price': order.price
-        } for order in session.query(Order).where((Order.user_id == user.id) & (Order.market_id == market.id))]
+        } for order in session.query(Order).where((Order.user_id == user.id) & (Order.market_id == market.id)).order_by(Order.id.desc()).all()]
 
   def trades(self, api_key, market_name):
     if api_key == 'auto': return {'error': 'Invalid api_key'}
     with Session(self.engine) as session:
       try:
-        [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
+        [user] = session.query(User).where(User.api_key == api_key)
       except:
         return {'error': 'api_key not found'}
       try:
@@ -170,21 +176,22 @@ class Exchange:
       except:
         return {'error': 'Market not found'}
       return [{
-          'type': 'buy' if trade.order_type == OrderType.BUY else 'sell',
-          'amount': trade.amount,
+          'timestamp': trade.timestamp,
+          'type': 'Buy' if trade.order_type == OrderType.BUY else 'Sell',
+          'volume': trade.amount,
           'price': trade.price,
           'fee': trade.fee
-        } for trade in session.query(Trade).where((Trade.user_id == user.id) & (Trade.market_id == market.id))]
+        } for trade in session.query(Trade).where((Trade.user_id == user.id) & (Trade.market_id == market.id)).order_by(Trade.id.desc()).all()]
 
   def buy(self, api_key, market_name, amount, price):
     if api_key == 'auto': return {'error': 'Invalid api_key'}
     if not is_valid(amount):
-      return {'error': 'Invalid amount'}
+      return {'error': 'Invalid volume'}
     if not is_valid(price):
       return {'error': 'Invalid price'}
     with Session(self.engine) as session:
       try:
-        [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
+        [user] = session.query(User).where(User.api_key == api_key)
       except:
         return {'error': 'api_key not found'}
       try:
@@ -250,12 +257,12 @@ class Exchange:
   def sell(self, api_key, market_name, amount, price):
     if api_key == 'auto': return {'error': 'Invalid api_key'}
     if not is_valid(amount):
-      return {'error': 'Invalid amount'}
+      return {'error': 'Invalid volume'}
     if not is_valid(price):
       return {'error': 'Invalid price'}
     with Session(self.engine) as session:
       try:
-        [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
+        [user] = session.query(User).where(User.api_key == api_key)
       except:
         return {'error': 'api_key not found'}
       try:
@@ -319,7 +326,7 @@ class Exchange:
     if api_key == 'auto': return {'error': 'Invalid api_key'}
     with Session(self.engine) as session:
       try:
-        [user] = session.query(User).where(User.api_key == hash_api_key(api_key))
+        [user] = session.query(User).where(User.api_key == api_key)
       except:
         return {'error':'api_key not found'}
       session.begin_nested()
@@ -354,7 +361,7 @@ class Exchange:
         return {'error': 'Invallid ' + market.asset.name + ' address.'}
       deposit_address = assets[market.currency.name].get_new_deposit_address()
       try:
-        auto_order = AutoOrder(id=self.random_128_bit_string(), market_id=market.id, order_type=OrderType.BUY, withdrawal_address=address, deposit_address=deposit_address, refund_address=refund_address)
+        auto_order = AutoOrder(id=random_128_bit_string(), market_id=market.id, order_type=OrderType.BUY, withdrawal_address=address, deposit_address=deposit_address, refund_address=refund_address)
       except:
         return {'error': 'One of your addresses has been used on this site before. Please use new addresses.'}
       session.add(auto_order)
@@ -373,7 +380,7 @@ class Exchange:
         return {'error': 'Invallid ' + market.currency.name + ' address.'}
       deposit_address = assets[market.asset.name].get_new_deposit_address()
       try:
-        auto_order = AutoOrder(id=self.random_128_bit_string(), market_id=market.id, order_type=OrderType.SELL, withdrawal_address=address, deposit_address=deposit_address, refund_address=refund_address)
+        auto_order = AutoOrder(id=random_128_bit_string(), market_id=market.id, order_type=OrderType.SELL, withdrawal_address=address, deposit_address=deposit_address, refund_address=refund_address)
       except:
         return {'error': 'One of your addresses has been used on this site before. Please use new addresses.'}
       session.add(auto_order)

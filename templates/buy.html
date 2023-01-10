@@ -1,27 +1,14 @@
-<!doctype html>
-<style>
-  html { background-color: #000; color: #fff; }
-  body { text-align: center; }
-  input, button, select { background-color: #111; border: 1px solid #777; color: #fff; padding: 0.5em; }
-  a, a:hover, a:visited { color: rgb(236, 103, 44); text-decoration: none; }
-  #nav a { padding: 0 2em; }
-</style>
-<meta name="description" content="Monero/Bitcoin cryptocurrency exchange with 0% trading fees. No sign up required."/>
-<meta name=”robots” content="index, follow"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="keywords" content="Monero, Bitcoin, Exchange"/>
-<meta charset="UTF-8"/>
-<title>Fryx Finance</title>
-<p id="nav"><a href="/">Buy Monero</a> <a href="/xmr/sell">Sell Monero</a> <a href="/api">API Documentation</a></p>
-<h1><img src="/header.png"/></h1>
-<h2>Buy Monero</h2>
-<form action="/" method="post">
-  <p>If we can't fulfil your entire order, we will refund the amount that was not exchanged.</p>
-  {% if error %}
-    <p>{{ error }}</p>
-  {% endif %}
-  <input type="hidden" name="market" value="XMRBTC"/>
-  <p><input name="withdrawal_address" size="100" placeholder="Your Monero address"/></p>
-  <p><input name="refund_address" size="100" placeholder="Your Bitcoin refund address"/></p>
-  <p><input type="Submit" id="action" value="Buy Monero"/></p>
-</form>
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Buy Monero</h2>
+  <form action="/" method="post">
+    <p>If we can't fulfil your entire order, we will refund the amount that was not exchanged.</p>
+    {% if error %}
+      <p>{{ error }}</p>
+    {% endif %}
+    <input type="hidden" name="market" value="XMRBTC"/>
+    <p><input name="withdrawal_address" size="100" placeholder="Your Monero address"/></p>
+    <p><input name="refund_address" size="100" placeholder="Your Bitcoin refund address"/></p>
+    <p><input type="Submit" id="action" value="Buy Monero"/></p>
+  </form>
+{% endblock %}
