@@ -73,7 +73,7 @@ def dashboard(app, exchange, engine):
       except:
         return render_template('dashboard/login.html', error='User not found.', csrf=csrf, logged_in=logged_in)
       if not user.email_verified:
-        return render_template('dashboard/login.html', error='Please check your email for email verification before logging in.', csrf=csrf, logged_in=logged_in)
+        return render_template('dashboard/login.html', error='Please check your email for verification before logging in.', csrf=csrf, logged_in=logged_in)
       login_code = LoginCode(user_id=user.id, code=random_128_bit_string(), expiry=int(time() + 60*60*2))
       session.add(login_code)
       session.commit()
