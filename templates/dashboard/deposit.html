@@ -10,7 +10,6 @@
       <tr><td>{{ asset['name'] }}</td><td>{{ asset['address'] }}</td></tr>
     {% endfor %}
   </table>
-  <h2>Unconfirmed Deposits</h2>
   {% if not unconfirmed_deposits %}
     <p>Waiting for deposits... <img src="/loading.gif" width="32px"/></p>
   {% endif %}
