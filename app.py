@@ -62,8 +62,15 @@ def xmr_sell():
 @app.get('/auto/buy/<id>')
 def auto_buy_id(id):
   rate_limit(ip=True)
+  if 'amount' in request.args:
+    try:
+      amount = Decimal(request.args['amount'])
+    except:
+      return {'error': 'Please enter a decimal value.'}
+  else:
+    amount = None
   try:
-    address, unconfirmed_transactions, confirmed_deposits, approximate_cost = exchange.get_auto(id, request.args.get('amount'))
+    address, unconfirmed_transactions, confirmed_deposits, approximate_cost = exchange.get_auto(id, amount)
   except:
     abort(404)
   return render_template('auto_buy.html', address=address, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits, error=approximate_cost.get('error'), amount=approximate_cost.get('amount'), approximate_cost=approximate_cost.get('cost'), hit_maximum=approximate_cost.get('hit_maximum'))
@@ -71,8 +78,15 @@ def auto_buy_id(id):
 @app.get('/auto/sell/<id>')
 def auto_sell_id(id):
   rate_limit(ip=True)
+  if 'amount' in request.args:
+    try:
+      amount = Decimal(request.args['amount'])
+    except:
+      return {'error': 'Please enter a decimal value.'}
+  else:
+    amount = None
   try:
-    address, unconfirmed_transactions, confirmed_deposits, approximate_value = exchange.get_auto(id, request.args.get('amount'))
+    address, unconfirmed_transactions, confirmed_deposits, approximate_value = exchange.get_auto(id, amount)
   except:
     abort(404)
   return render_template('auto_sell.html', address=address, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits, error=approximate_value.get('error'), amount=approximate_value.get('amount'), approximate_value=approximate_value.get('value'), hit_maximum=approximate_value.get('hit_maximum'))
