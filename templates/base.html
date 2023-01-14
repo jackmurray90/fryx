@@ -17,7 +17,7 @@
   strong.dark { border: 1px solid rgb(118, 52, 22); }
   img { vertical-align: middle; max-width: 95%; }
 </style>
-<meta name="description" content="Monero/Bitcoin cryptocurrency exchange with 0% trading fees. No sign up required."/>
+<meta name="description" content="Monero/Bitcoin cryptocurrency exchange. No sign up required."/>
 <meta name=”robots” content="index, follow"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="keywords" content="Monero, Bitcoin, Exchange"/>
@@ -28,6 +28,7 @@
 {% if not logged_in %}
   <a href="/">Buy Monero</a>
   <a href="/xmr/sell">Sell Monero</a>
+  <a href="/fees">Fees</a>
   <a href="/api">API</a>
   <a href="/dashboard/new_user">Register</a>
   <a href="/dashboard/login">Log In</a>
@@ -37,6 +38,7 @@
   <a href="/dashboard/trades/XMRBTC">Trades</a>
   <a href="/dashboard/deposit">Deposit</a>
   <a href="/dashboard/withdraw">Withdraw</a>
+  <a href="/fees">Fees</a>
   <a href="/api">API</a>
   <form action="/dashboard/logout" method="post">
     {{ csrf|safe }}

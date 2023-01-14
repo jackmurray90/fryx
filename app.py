@@ -47,6 +47,12 @@ def api(csrf, logged_in):
   log_referrer()
   return render_template('api.html', csrf=csrf, logged_in=logged_in)
 
+@get('/fees')
+def api(csrf, logged_in):
+  rate_limit(engine, ip=True)
+  log_referrer()
+  return render_template('fees.html', csrf=csrf, logged_in=logged_in)
+
 @get('/')
 def xmr_buy(csrf, logged_in):
   rate_limit(engine, ip=True)

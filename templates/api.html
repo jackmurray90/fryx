@@ -7,7 +7,6 @@
   {% endif %}
   <h2>API Documentation</h2>
   <p>Requests are rate-limited at 50 requests per second.</p>
-  <p>There is a 0.2% fee for all trades.</p>
   <table>
     <tr><th>Endpoint</th><th>URL Parameters</th><th>Description</th><th>Example Responses</th></tr>
     <tr><th>/new_user</th><td></td><td>Generates a new API key.</td><td><pre>{"api_key": "iQtxykjG48y3F9A93jRPqC"}</pre></td></tr>
@@ -46,11 +45,6 @@
     <tr><th>/sell</th><td><ul><li>api_key</li><li>market</li><li>volume</li><li>price</li></ul></td>
       <td>Creates an order to sell <u>volume</u> of base asset in <u>market</u> at <u>price</u> or above.<br/>Returns the <u>order_id</u>, or success if the order was filled.</td><td><pre>{"order_id": 2}</pre><pre>{"success": true}</pre></td></tr>
     <tr><th>/cancel</th><td><ul><li>api_key</li><li>order_id</li></td><td>Cancels an order.</td><td><pre>{"success": true}</pre></td></tr>
-  </table>
-  <h2>Withdrawal Fees</h2>
-  <table>
-    <tr><th>BTC Withdrawal</th><td>0.0001 BTC</td></tr>
-    <tr><th>XMR Withdrawal</th><td>0.0001 XMR</td></tr>
   </table>
   <h2>Assets</h2>
   <table>
