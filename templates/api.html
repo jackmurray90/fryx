@@ -12,31 +12,31 @@
     <tr><th>/new_user</th><td></td><td>Generates a new API key.</td><td><pre>{"api_key": "iQtxykjG48y3F9A93jRPqC"}</pre></td></tr>
     <tr><th>/order_book</th><td><ul><li>market</li></ul></td><td>Gets the order book for <u>market</u>.</td><td>
   <pre>[{
-    "volume":"0.010000000000000000",
-    "executed": "0.000000000000000000",
-    "price":"0.010000000000000000",
-    "type":"buy"
-  }]</pre></td></tr>
+  "volume":"0.010000000000000000",
+  "executed": "0.000000000000000000",
+  "price":"0.010000000000000000",
+  "type":"buy"
+}]</pre></td></tr>
     <tr><th>/balances</th><td><ul><li>api_key</li></ul></td><td>Gets the balances for both XMR and BTC.</td>
       <td><pre>{"XMR": "0E-18", "BTC": "0E-18"}</pre></td></tr>
       <tr><th>/orders</th><td><ul><li>api_key</li><li>market</li></ul></td><td>Gets a list of your open orders in <u>market</u>.</td>
       <td>
   <pre>[{
-    "volume":"0.010000000000000000",
-    "executed": "0.000000000000000000",
-    "id":1,
-    "price":"0.010000000000000000",
-    "type":"buy"
-  }]</pre></td></tr>
+  "volume":"0.010000000000000000",
+  "executed": "0.000000000000000000",
+  "id":1,
+  "price":"0.010000000000000000",
+  "type":"buy"
+}]</pre></td></tr>
     <tr><th>/trades</th><td><ul><li>api_key</li><li>market</li></ul></td><td>Gets a list of the trades you have made in <u>market</u>.</td>
       <td>
   <pre>[{
-    "volume":"0.010000000000000000",
-    "fee":"0.0000002000",
-    "price":"0.010000000000000000",
-    "timestamp": 1673138672,
-    "type":"buy"
-  }]</pre></td></tr>
+  "volume":"0.010000000000000000",
+  "fee":"0.0000002000",
+  "price":"0.010000000000000000",
+  "timestamp": 1673138672,
+  "type":"buy"
+}]</pre></td></tr>
     <tr><th>/deposit</th><td><ul><li>api_key</li><li>asset</li></ul></td><td>Gets a deposit address for <u>asset</u>.</td><td><pre>{"address": "bc1qh5jnz3tjtvththmd0sjru5sq97p8e9qj9mm794"}</pre></td></tr>
     <tr><th>/withdraw</th><td><ul><li>api_key</li><li>asset</li><li>amount</li></ul></td>
       <td>Withdraws <u>amount</u> of <u>asset</u> to <u>address</u>. Total withdrawn is <u>amount</u>-<u>withdrawal fee</u>.</td><td><pre>{"success": true}</pre></td></tr>
