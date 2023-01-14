@@ -22,6 +22,11 @@ get, post = csrf(app, exchange)
 def format_decimal(d, decimal_places):
   if d == None:
     return ''
+  if d < 0:
+    negative = True
+    d = -d
+  else:
+    negative = False
   digit = Decimal('10')
   while digit <= d:
     digit *= 10
@@ -33,7 +38,7 @@ def format_decimal(d, decimal_places):
       result += '.'
     if digit < 1:
       decimal_places -= 1
-  return result
+  return result if not negative else '-' + str(result)
 
 @app.template_filter()
 def timestamp(t):
