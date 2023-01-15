@@ -21,9 +21,9 @@ if __name__ == '__main__':
     buy_orders = session.query(Order).where(Order.order_type == OrderType.BUY)
     sell_orders = session.query(Order).where(Order.order_type == OrderType.SELL)
     total_btc_in_accounts = sum([balance.amount for balance in btc_balances])
-    total_btc_in_orders = sum([round_up_to_18_decimal_places(order.amount * order.price) for order in buy_orders])
+    total_btc_in_orders = sum([round_up_to_18_decimal_places((order.amount - order.executed) * order.price) for order in buy_orders])
     total_xmr_in_accounts = sum([balance.amount for balance in xmr_balances])
-    total_xmr_in_orders = sum([order.amount for order in sell_orders])
+    total_xmr_in_orders = sum([order.amount-order.executed for order in sell_orders])
     total_btc = total_btc_in_accounts + total_btc_in_orders
     total_xmr = total_xmr_in_accounts + total_xmr_in_orders
     btc_rpc = BitcoinAuthServiceProxy(BITCOIN)
