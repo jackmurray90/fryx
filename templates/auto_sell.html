@@ -12,7 +12,7 @@
   {% if hit_maximum %}
     <p>We can only exchange {{ amount|format_decimal(12) }} XMR at the moment.</p>
   {% endif %}
-  {% if approximate_value %}
+  {% if approximate_value is not none %}
     <p>This has value of approximately {{ approximate_value|format_decimal(8) }} BTC.</p>
   {% endif %}
   <p>Your deposit address is:</p>
