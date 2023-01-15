@@ -364,11 +364,11 @@ class Exchange:
       deposit_address = assets[market.currency.name].get_new_deposit_address()
       try:
         auto_order = AutoOrder(id=random_128_bit_string(), market_id=market.id, order_type=OrderType.BUY, withdrawal_address=address, deposit_address=deposit_address, refund_address=refund_address)
+        session.add(auto_order)
+        session.commit()
+        return {'id': auto_order.id}
       except:
         return {'error': 'One of your addresses has been used on this site before. Please use new addresses.'}
-      session.add(auto_order)
-      session.commit()
-      return {'id': auto_order.id}
 
   def auto_sell(self, market_name, address, refund_address):
     with Session(self.engine) as session:
@@ -383,11 +383,11 @@ class Exchange:
       deposit_address = assets[market.asset.name].get_new_deposit_address()
       try:
         auto_order = AutoOrder(id=random_128_bit_string(), market_id=market.id, order_type=OrderType.SELL, withdrawal_address=address, deposit_address=deposit_address, refund_address=refund_address)
+        session.add(auto_order)
+        session.commit()
+        return {'id': auto_order.id}
       except:
         return {'error': 'One of your addresses has been used on this site before. Please use new addresses.'}
-      session.add(auto_order)
-      session.commit()
-      return {'id': auto_order.id}
 
   def get_auto(self, id, amount):
     with Session(self.engine) as session:
