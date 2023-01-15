@@ -434,4 +434,5 @@ class Exchange:
           hit_maximum = False
           break
       approximate_value -= Decimal('0.0001') # TODO: make this withdrawal fee calculation portable across markets
+      approximate_value = max(0, approximate_value)
       return {'amount': amount_exchanged, 'hit_maximum': hit_maximum, 'value': approximate_value}
