@@ -110,7 +110,7 @@ class AutoOrder(Base):
   market_id = Column(Integer, ForeignKey('markets.id'))
   order_type = Column(Enum(OrderType))
   deposit_address = Column(String, unique=True)
-  withdrawal_address = Column(String, unique=True)
+  withdrawal_address = Column(String)
   refund_address = Column(String)
 
   deposits = relationship('AutoDeposit')
