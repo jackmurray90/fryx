@@ -16,7 +16,7 @@
     <p>This will cost approximately {{ approximate_cost|format_decimal(8) }} BTC.</p>
   {% endif %}
   <p>Your deposit address is:</p>
-  <p><strong>{{ address }}</strong></p>
+  <p><strong class="light">{{ address }}</strong></p>
   <p>As soon as we receive a deposit, we will exchange it and send the result to the address you provided.</p>
   {% if not unconfirmed_transactions and not confirmed_deposits %}
     <p>Waiting for deposit... <img src="/loading.gif" width="32px"/></p>
