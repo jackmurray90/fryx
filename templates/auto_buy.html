@@ -3,6 +3,7 @@
   <meta http-equiv="refresh" content="20"/>
 {% endblock %}
 {% block content %}
+  <p>The minimum deposit amount is 0.0002 BTC. Withdrawal fee is 0.0001 XMR.</p>
   <form action="">
     <p><input name="amount" placeholder="Amount of Monero" value="{{ amount|format_decimal(12) }}"/> <input type="submit" value="Calculate approximate cost"/></p>
   </form>
