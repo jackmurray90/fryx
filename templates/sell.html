@@ -3,8 +3,8 @@
   <h2>Sell Monero</h2>
   <form action="/xmr/sell" method="post">
     <p>If we can't fulfill your entire order, we will refund the amount that was not exchanged.</p>
-    {% if error %}
-      <p>{{ error }}</p>
+    {% if message %}
+      <p>{{ message }}</p>
     {% endif %}
     <input type="hidden" name="market" value="XMRBTC"/>
     <p><input name="withdrawal_address" size="100" placeholder="Your Bitcoin address"/></p>

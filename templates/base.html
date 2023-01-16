@@ -25,7 +25,7 @@
 {% block head %}{% endblock %}
 <title>Fryx Finance</title>
 <div id="nav">
-{% if not logged_in %}
+{% if not user %}
   <a href="/">Buy Monero</a>
   <a href="/xmr/sell">Sell Monero</a>
   <a href="/fees">Fees</a>

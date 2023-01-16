@@ -47,76 +47,62 @@ def timestamp(t):
 dashboard(app, exchange, engine)
 
 @get('/api')
-def api(csrf, logged_in):
+def api(render_template, user):
   rate_limit(engine, ip=True)
   log_referrer()
-  return render_template('api.html', csrf=csrf, logged_in=logged_in)
+  return render_template('api.html')
 
 @get('/fees')
-def api(csrf, logged_in):
+def api(render_template, user):
   rate_limit(engine, ip=True)
   log_referrer()
-  return render_template('fees.html', csrf=csrf, logged_in=logged_in)
+  return render_template('fees.html')
 
 @get('/')
-def xmr_buy(csrf, logged_in):
+def xmr_buy(render_template, user):
   rate_limit(engine, ip=True)
   log_referrer()
-  return render_template('buy.html', csrf=csrf, logged_in=logged_in)
+  return render_template('buy.html')
 
 @post('/')
-def xmr_buy_action(csrf, logged_in):
+def xmr_buy_action(redirect, user):
   rate_limit(engine, ip=True)
   auto = exchange.auto_buy(request.form['market'], request.form['withdrawal_address'], request.form['refund_address'])
   if 'error' in auto:
-    return render_template('buy.html', order_type='buy', error=auto['error'], csrf=csrf, logged_in=logged_in)
+    return redirect('/', auto['error'])
   return redirect('/auto/buy/%s' % auto['id'])
 
 @get('/xmr/sell')
-def xmr_sell(csrf, logged_in):
+def xmr_sell(render_template, user):
   rate_limit(engine, ip=True)
   log_referrer()
-  return render_template('sell.html', csrf=csrf, logged_in=logged_in)
+  return render_template('sell.html')
 
 @post('/xmr/sell')
-def xmr_sell_action(csrf, logged_in):
+def xmr_sell_action(redirect, user):
   rate_limit(engine, ip=True)
   auto = exchange.auto_sell(request.form['market'], request.form['withdrawal_address'], request.form['refund_address'])
   if 'error' in auto:
-    return render_template('sell.html', order_type='sell', error=auto['error'], csrf=csrf, logged_in=logged_in)
+    return redirect('/xmr/sell', auto['error'])
   return redirect('/auto/sell/%s' % auto['id'])
 
 @get('/auto/buy/<id>')
-def auto_buy_id(csrf, logged_in, id):
+def auto_buy_id(render_template, user, id):
   rate_limit(engine, ip=True)
-  if 'amount' in request.args:
-    try:
-      amount = Decimal(request.args['amount'])
-    except:
-      return {'error': 'Please enter a decimal value.'}
-  else:
-    amount = None
   try:
-    address, unconfirmed_transactions, confirmed_deposits, approximate_cost = exchange.get_auto(id, amount)
+    address, unconfirmed_transactions, confirmed_deposits, approximate_cost = exchange.get_auto(id, request.args.get('amount'))
   except:
     abort(404)
-  return render_template('auto_buy.html', address=address, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits, error=approximate_cost.get('error'), amount=approximate_cost.get('amount'), approximate_cost=approximate_cost.get('cost'), hit_maximum=approximate_cost.get('hit_maximum'), csrf=csrf, logged_in=logged_in)
+  return render_template('auto_buy.html', address=address, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits, message=approximate_cost.get('error'), amount=approximate_cost.get('amount'), approximate_cost=approximate_cost.get('cost'), hit_maximum=approximate_cost.get('hit_maximum'))
 
 @get('/auto/sell/<id>')
-def auto_sell_id(csrf, logged_in, id):
+def auto_sell_id(render_template, user, id):
   rate_limit(engine, ip=True)
-  if 'amount' in request.args:
-    try:
-      amount = Decimal(request.args['amount'])
-    except:
-      return {'error': 'Please enter a decimal value.'}
-  else:
-    amount = None
   try:
-    address, unconfirmed_transactions, confirmed_deposits, approximate_value = exchange.get_auto(id, amount)
+    address, unconfirmed_transactions, confirmed_deposits, approximate_value = exchange.get_auto(id, request.args.get('amount'))
   except:
     abort(404)
-  return render_template('auto_sell.html', address=address, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits, error=approximate_value.get('error'), amount=approximate_value.get('amount'), approximate_value=approximate_value.get('value'), hit_maximum=approximate_value.get('hit_maximum'), csrf=csrf, logged_in=logged_in)
+  return render_template('auto_sell.html', address=address, unconfirmed_transactions=unconfirmed_transactions, confirmed_deposits=confirmed_deposits, message=approximate_value.get('error'), amount=approximate_value.get('amount'), approximate_value=approximate_value.get('value'), hit_maximum=approximate_value.get('hit_maximum'))
 
 @app.route('/order_book')
 def order_book():

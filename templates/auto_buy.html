@@ -7,8 +7,8 @@
   <form action="">
     <p><input name="amount" placeholder="Amount of Monero" value="{{ amount|format_decimal(12) }}"/> <input type="submit" value="Calculate approximate cost"/></p>
   </form>
-  {% if error %}
-    <p>{{ error }}</p>
+  {% if message %}
+    <p>{{ message }}</p>
   {% endif %}
   {% if hit_maximum %}
     <p>We can only exchange {{ amount|format_decimal(12) }} XMR at the moment.</p>

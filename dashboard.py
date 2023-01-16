@@ -1,4 +1,4 @@
-from flask import request, abort, render_template, redirect, make_response
+from flask import request, abort, redirect, make_response, render_template
 from csrf import csrf
 from db import User, LoginCode, Asset
 from sqlalchemy.orm import Session
@@ -15,22 +15,22 @@ def dashboard(app, exchange, engine):
   get, post = csrf(app, exchange)
 
   @get('/dashboard/new_user')
-  def new_user(csrf, logged_in):
+  def new_user(render_template, user):
     rate_limit(engine, ip=True)
-    if logged_in: return redirect('/dashboard/balances')
-    return render_template('dashboard/new_user.html', csrf=csrf, logged_in=logged_in)
+    if user: return redirect('/dashboard/balances')
+    return render_template('dashboard/new_user.html')
 
   @post('/dashboard/new_user')
-  def new_user(csrf, logged_in):
+  def new_user(redirect, user):
     rate_limit(engine, ip=True)
-    if logged_in: return redirect('/dashboard/balances')
+    if user: return redirect('/dashboard/balances')
     if not re.match('^[\w.-]+@[\w.-]+$', request.form['email']):
-      return render_template('dashboard/new_user.html', error='Please enter a valid email address.', csrf=csrf, logged_in=logged_in)
+      return redirect('/dashboard/new_user', 'Please enter a valid email address.')
     with Session(engine) as session:
       email_verification_code = random_128_bit_string()
       try:
         [user] = session.query(User).where(User.email == request.form['email'])
-        return render_template('dashboard/new_user.html', error='A user with that email address already exists.', csrf=csrf, logged_in=logged_in)
+        return redirect('/dashboard/new_user', 'A user with that email address already exists.')
       except:
         pass
       user = User(email=request.form['email'], api_key=random_128_bit_string(), email_verification_code=email_verification_code)
@@ -40,13 +40,13 @@ def dashboard(app, exchange, engine):
     return redirect('/dashboard/check_verification_email')
 
   @get('/dashboard/check_verification_email')
-  def check_email(csrf, logged_in):
+  def check_email(render_template, user):
     rate_limit(engine, ip=True)
-    if logged_in: return redirect('/dashboard/balances')
-    return render_template('dashboard/check_verification_email.html', csrf=csrf, logged_in=logged_in)
+    if user: return redirect('/dashboard/balances')
+    return render_template('dashboard/check_verification_email.html')
 
   @get('/dashboard/verify_email/<code>')
-  def verify_email(csrf, logged_in, code):
+  def verify_email(render_template, user, code):
     rate_limit(engine, ip=True)
     with Session(engine) as session:
       try:
@@ -56,27 +56,32 @@ def dashboard(app, exchange, engine):
       user.email_verified = True
       user.email_verification_code = None
       session.commit()
-      response = make_response(render_template('dashboard/verified_email.html', csrf=csrf, logged_in=True))
+      response = make_response(redirect('/dashboard/verified_email'))
       response.set_cookie('api_key', user.api_key)
       return response
 
-  @get('/dashboard/login')
-  def login(csrf, logged_in):
+  @get('/dashboard/verified_email')
+  def verified_email(render_template, user):
     rate_limit(engine, ip=True)
-    if logged_in: return redirect('/dashboard/balances')
-    return render_template('dashboard/login.html', csrf=csrf, logged_in=logged_in)
+    return render_template('dashboard/verified_email.html')
+
+  @get('/dashboard/login')
+  def login(render_template, user):
+    rate_limit(engine, ip=True)
+    if user: return redirect('/dashboard/balances')
+    return render_template('dashboard/login.html')
 
   @post('/dashboard/login')
-  def login(csrf, logged_in):
+  def login(redirect, user):
     rate_limit(engine, ip=True)
-    if logged_in: return redirect('/dashboard/balances')
+    if user: return redirect('/dashboard/balances')
     with Session(engine) as session:
       try:
         [user] = session.query(User).where(User.email == request.form['email'])
       except:
-        return render_template('dashboard/login.html', error='User not found.', csrf=csrf, logged_in=logged_in)
+        return redirect('/dashboard/login', 'User not found.')
       if not user.email_verified:
-        return render_template('dashboard/login.html', error='Please check your email for verification before logging in.', csrf=csrf, logged_in=logged_in)
+        return redirect('/dashboard/login', 'Please check your email for verification before logging in.')
       login_code = LoginCode(user_id=user.id, code=random_128_bit_string(), expiry=int(time() + 60*60*2))
       session.add(login_code)
       session.commit()
@@ -84,22 +89,22 @@ def dashboard(app, exchange, engine):
       return redirect('/dashboard/check_login_email')
 
   @get('/dashboard/check_login_email')
-  def check_login_email(csrf, logged_in):
+  def check_login_email(render_template, user):
     rate_limit(engine, ip=True)
-    if logged_in: return redirect('/dashboard/balances')
-    return render_template('dashboard/check_login_email.html', csrf=csrf, logged_in=logged_in)
+    if user: return redirect('/dashboard/balances')
+    return render_template('dashboard/check_login_email.html')
 
   @get('/dashboard/login/<code>')
-  def login(csrf, logged_in, code):
+  def login(render_template, user, code):
     rate_limit(engine, ip=True)
-    if logged_in: return redirect('/')
+    if user: return redirect('/dashboard/balances')
     with Session(engine) as session:
       try:
         [login_code] = session.query(LoginCode).where(LoginCode.code == code)
       except:
         abort(404)
       if login_code.expiry < time():
-        return render_template('dashboard/login_code_expired.html', csrf=csrf, logged_in=logged_in)
+        return render_template('dashboard/login_code_expired.html')
       response = make_response(redirect('/dashboard/balances'))
       response.set_cookie('api_key', login_code.user.api_key)
       session.delete(login_code)
@@ -107,81 +112,80 @@ def dashboard(app, exchange, engine):
       return response
 
   @post('/dashboard/logout')
-  def logout(csrf, logged_in):
+  def logout(redirect, user):
     rate_limit(engine, ip=True)
-    if not logged_in: return redirect('/')
-    response = make_response(redirect('/'))
+    if not user: return redirect('/')
+    response = redirect('/')
     response.set_cookie('api_key', '', expires=0)
     return response
 
   @get('/dashboard/balances')
-  def balances(csrf, logged_in):
+  def balances(render_template, user):
     rate_limit(engine, ip=True)
-    if not logged_in: return redirect('/')
-    return render_template('dashboard/balances.html', balances=exchange.balances(logged_in.api_key), csrf=csrf, logged_in=logged_in)
+    if not user: return redirect('/')
+    return render_template('dashboard/balances.html', balances=exchange.balances(user.api_key))
 
   @get('/dashboard/orders/<market_name>')
-  def orders(csrf, logged_in, market_name):
+  def orders(render_template, user, market_name):
     rate_limit(engine, ip=True)
-    if not logged_in: return redirect('/')
+    if not user: return redirect('/')
     market = exchange.check_market(market_name)
     if not market: abort(404)
-    orders = exchange.orders(logged_in.api_key, market_name)
-    return render_template('dashboard/orders.html', market=market, orders=orders, csrf=csrf, logged_in=logged_in)
+    return render_template('dashboard/orders.html', market=market, orders=exchange.orders(user.api_key, market_name))
 
   @post('/dashboard/orders/<market_name>')
-  def orders(csrf, logged_in, market_name):
+  def orders(redirect, user, market_name):
     rate_limit(engine, ip=True)
-    if not logged_in: return redirect('/')
+    if not user: return redirect('/')
     market = exchange.check_market(market_name)
     if not market: abort(404)
     try:
       volume = Decimal(request.form['volume'])
       price = Decimal(request.form['price'])
     except:
-      return render_template('dashboard/orders.html', message='Please enter only decimal values for volume and price.', market=market, orders=exchange.orders(logged_in.api_key, market_name), csrf=csrf, logged_in=logged_in)
+      return redirect(f'/dashboard/orders/{market_name}', 'Please enter only decimal values for volume and price.')
     if request.form['type'] == 'buy':
-      new_order = exchange.buy(logged_in.api_key, market_name, volume, price)
+      new_order = exchange.buy(user.api_key, market_name, volume, price)
     else:
-      new_order = exchange.sell(logged_in.api_key, market_name, volume, price)
+      new_order = exchange.sell(user.api_key, market_name, volume, price)
     if 'error' in new_order:
-      return render_template('dashboard/orders.html', message=new_order['error'], market=market, orders=exchange.orders(logged_in.api_key, market_name), csrf=csrf, logged_in=logged_in)
+      return redirect(f'/dashboard/orders/{market_name}', new_order['error'])
     if 'success' in new_order:
-      return render_template('dashboard/orders.html', message='The order was filled.', market=market, orders=exchange.orders(logged_in.api_key, market_name), csrf=csrf, logged_in=logged_in)
-    return render_template('dashboard/orders.html', message=f'A new order was created with order ID {new_order["order_id"]}.', market=market, orders=exchange.orders(logged_in.api_key, market_name), csrf=csrf, logged_in=logged_in)
+      return redirect(f'/dashboard/orders/{market_name}', 'The order was filled.')
+    return redirect(f'/dashboard/orders/{market_name}', f'A new order was created with order ID {new_order["order_id"]}.')
 
   @post('/dashboard/orders/<market_name>/cancel')
-  def orders(csrf, logged_in, market_name):
+  def cancel(redirect, user, market_name):
     rate_limit(engine, ip=True)
-    if not logged_in: return redirect('/')
+    if not user: return redirect('/')
     market = exchange.check_market(market_name)
     if not market: abort(404)
     try:
       id = Decimal(request.form['id'])
     except:
-      return render_template('dashboard/orders.html', message='Invalid order id', market=market, orders=exchange.orders(logged_in.api_key, market_name), csrf=csrf, logged_in=logged_in)
-    result = exchange.cancel(logged_in.api_key, id)
+      return redirect(f'/dashboard/orders/{market_name}', 'Invalid order id')
+    result = exchange.cancel(user.api_key, id)
     if 'error' in result:
-      return render_template('dashboard/orders.html', message=result['error'], market=market, orders=exchange.orders(logged_in.api_key, market_name), csrf=csrf, logged_in=logged_in)
-    return render_template('dashboard/orders.html', message='The order was cancelled.', market=market, orders=exchange.orders(logged_in.api_key, market_name), csrf=csrf, logged_in=logged_in)
+      return redirect(f'/dashboard/orders/{market_name}', result['error'])
+    return redirect(f'/dashboard/orders/{market_name}', 'The order was cancelled.')
 
   @get('/dashboard/trades/<market_name>')
-  def trades(csrf, logged_in, market_name):
+  def trades(render_template, user, market_name):
     rate_limit(engine, ip=True)
-    if not logged_in: return redirect('/')
+    if not user: return redirect('/')
     market = exchange.check_market(market_name)
     if not market: abort(404)
-    return render_template('dashboard/trades.html', market=market, trades=exchange.trades(logged_in.api_key, market_name), csrf=csrf, logged_in=logged_in)
+    return render_template('dashboard/trades.html', market=market, trades=exchange.trades(user.api_key, market_name))
 
   @get('/dashboard/deposit')
-  def deposit(csrf, logged_in):
+  def deposit(render_template, user):
     rate_limit(engine, ip=True)
-    if not logged_in: return redirect('/')
+    if not user: return redirect('/')
     with Session(engine) as session:
       coins = []
       unconfirmed_deposits = []
       for asset in session.query(Asset).all():
-        address = exchange.deposit(logged_in.api_key, asset.name)['address']
+        address = exchange.deposit(user.api_key, asset.name)['address']
         coins.append({'name': asset.name, 'address': address})
         for deposit in assets[asset.name].get_unconfirmed_transactions(address):
           unconfirmed_deposits.append({
@@ -190,33 +194,25 @@ def dashboard(app, exchange, engine):
             'confirmations': deposit['confirmations'],
             'required_confirmations': assets[asset.name].confirmations()
           })
-      return render_template('dashboard/deposit.html', assets=coins, unconfirmed_deposits=unconfirmed_deposits, csrf=csrf, logged_in=logged_in)
+      return render_template('dashboard/deposit.html', assets=coins, unconfirmed_deposits=unconfirmed_deposits)
 
   @get('/dashboard/withdraw')
-  def withdraw(csrf, logged_in):
+  def withdraw(render_template, user):
     rate_limit(engine, ip=True)
-    if not logged_in: return redirect('/')
+    if not user: return redirect('/')
     with Session(engine) as session:
       coins = [asset.name for asset in session.query(Asset).all()]
-      response = make_response(render_template('dashboard/withdraw.html', message=request.cookies.get('message'), assets=coins, csrf=csrf, logged_in=logged_in))
-      response.set_cookie('message', '', expires=0)
-      return response
+      return render_template('dashboard/withdraw.html', assets=coins)
 
   @post('/dashboard/withdraw/<asset>')
-  def withdraw(csrf, logged_in, asset):
+  def withdraw(redirect, user, asset):
     rate_limit(engine, ip=True)
-    if not logged_in: return redirect('/')
+    if not user: return redirect('/')
     try:
       amount = Decimal(request.form['amount'])
     except:
-      response = make_response(redirect('/dashboard/withdraw'))
-      response.set_cookie('message', 'Invalid amount.')
-      return response
-    result = exchange.withdraw(logged_in.api_key, asset, request.form['address'], amount)
+      return redirect('/dashboard/withdraw', 'Please only use decimals for the amount.')
+    result = exchange.withdraw(user.api_key, asset, request.form['address'], amount)
     if 'error' in result:
-      response = make_response(redirect('/dashboard/withdraw'))
-      response.set_cookie('message', result['error'])
-      return response
-    response = make_response(redirect('/dashboard/withdraw'))
-    response.set_cookie('message', 'Successfully submitted the withdrawal request.')
-    return response
+      return redirect('/dashboard/withdraw', result['error'])
+    return redirect('/dashboard/withdraw', 'Successfully submitted the withdrawal request.')

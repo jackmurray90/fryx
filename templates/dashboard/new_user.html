@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
 <form action="/dashboard/new_user" method="post">
-  {% if error %}
-    <p>{{ error }}</p>
+  {% if message %}
+    <p>{{ message }}</p>
   {% endif %}
   <p>
     <input name='email' placeholder="Email address"/>

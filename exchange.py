@@ -42,7 +42,7 @@ class Exchange:
         [user] = session.query(User).where(User.api_key == api_key)
         return user
       except:
-        return False
+        return None
 
   def check_market(self, market_name):
     with Session(self.engine) as session:
@@ -52,7 +52,7 @@ class Exchange:
         market.currency
         return market
       except:
-        return False
+        return None
 
   def get_balance(self, session, user, asset):
     try:
@@ -397,6 +397,10 @@ class Exchange:
       return auto.deposit_address, asset.get_unconfirmed_transactions(auto.deposit_address), [d.amount for d in reversed(auto.deposits)], approximate
 
   def calculate_approximate_cost(self, market, amount):
+    try:
+      amount = Decimal(amount)
+    except:
+      return {'error': 'Please enter a decimal value.'}
     with Session(self.engine) as session:
       orders = session.query(Order).where((Order.market_id == market.id) & (Order.order_type == OrderType.SELL)).order_by(Order.price.asc()).all();
       approximate_cost = Decimal(0)
@@ -414,6 +418,10 @@ class Exchange:
       return {'amount': amount_exchanged, 'hit_maximum': hit_maximum, 'cost': approximate_cost}
 
   def calculate_approximate_value(self, market, amount):
+    try:
+      amount = Decimal(amount)
+    except:
+      return {'error': 'Please enter a decimal value.'}
     with Session(self.engine) as session:
       orders = session.query(Order).where((Order.market_id == market.id) & (Order.order_type == OrderType.BUY)).order_by(Order.price.desc()).all();
       approximate_value = Decimal(0)
