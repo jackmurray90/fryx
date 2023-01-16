@@ -150,6 +150,21 @@ def dashboard(app, exchange, engine):
       return render_template('dashboard/orders.html', message='The order was filled.', market=market, orders=exchange.orders(logged_in.api_key, market_name), csrf=csrf, logged_in=logged_in)
     return render_template('dashboard/orders.html', message=f'A new order was created with order ID {new_order["order_id"]}.', market=market, orders=exchange.orders(logged_in.api_key, market_name), csrf=csrf, logged_in=logged_in)
 
+  @post('/dashboard/orders/<market_name>/cancel')
+  def orders(csrf, logged_in, market_name):
+    rate_limit(engine, ip=True)
+    if not logged_in: return redirect('/')
+    market = exchange.check_market(market_name)
+    if not market: abort(404)
+    try:
+      id = Decimal(request.form['id'])
+    except:
+      return render_template('dashboard/orders.html', message='Invalid order id', market=market, orders=exchange.orders(logged_in.api_key, market_name), csrf=csrf, logged_in=logged_in)
+    result = exchange.cancel(logged_in.api_key, id)
+    if 'error' in result:
+      return render_template('dashboard/orders.html', message=result['error'], market=market, orders=exchange.orders(logged_in.api_key, market_name), csrf=csrf, logged_in=logged_in)
+    return render_template('dashboard/orders.html', message='The order was cancelled.', market=market, orders=exchange.orders(logged_in.api_key, market_name), csrf=csrf, logged_in=logged_in)
+
   @get('/dashboard/trades/<market_name>')
   def trades(csrf, logged_in, market_name):
     rate_limit(engine, ip=True)

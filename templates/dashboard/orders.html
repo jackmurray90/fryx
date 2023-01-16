@@ -18,9 +18,16 @@
   </p>
 </form>
 <table>
-  <tr><th>Order ID</th><th>Type</th><th>Volume</th><th>Executed</th><th>Price</th></tr>
+  <tr><th>Order ID</th><th>Type</th><th>Volume</th><th>Executed</th><th>Price</th><th>Cancel</th></tr>
   {% for order in orders %}
-    <tr><td>{{ order['id'] }}</td><td>{{ order['type'] }}</td><td>{{ order['volume']|format_decimal(18) }} {{ market.asset.name }}</td><td>{{ order['executed']|format_decimal(18) }} {{ market.asset.name }}</td><td>{{ order['price']|format_decimal(18) }} {{ market.currency.name }}</td></tr>
+    <tr>
+      <td>{{ order['id'] }}</td>
+      <td>{{ order['type'] }}</td>
+      <td>{{ order['volume']|format_decimal(18) }} {{ market.asset.name }}</td>
+      <td>{{ order['executed']|format_decimal(18) }} {{ market.asset.name }}</td>
+      <td>{{ order['price']|format_decimal(18) }} {{ market.currency.name }}</td>
+      <td><form action="/dashboard/orders/{{ market.name }}/cancel" method="post">{{ csrf|safe }}<input type="hidden" name="id" value="{{ order['id'] }}"/><input type="submit" value="Cancel"/></td>
+    </tr>
   {% endfor %}
 </table>
 {% endblock %}
