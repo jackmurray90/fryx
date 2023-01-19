@@ -38,7 +38,7 @@
   "type":"buy"
 }]</pre></td></tr>
     <tr><th>/deposit</th><td><ul><li>api_key</li><li>asset</li></ul></td><td>Gets a deposit address for <strong>asset</strong>.</td><td><pre>{"address": "bc1qh5jnz3tjtvththmd0sjru5sq97p8e9qj9mm794"}</pre></td></tr>
-    <tr><th>/withdraw</th><td><ul><li>api_key</li><li>asset</li><li>amount</li></ul></td>
+    <tr><th>/withdraw</th><td><ul><li>api_key</li><li>asset</li><li>address</li><li>amount</li></ul></td>
       <td>Withdraws <strong>amount</strong> of <strong>asset</strong> to <strong>address</strong>. Total withdrawn is <strong>amount</strong>-<strong>withdrawal fee</strong>.</td><td><pre>{"success": true}</pre></td></tr>
     <tr><th>/buy</th><td><ul><li>api_key</li><li>market</li><li>volume</li><li>price</li></ul></td>
       <td>Creates an order to buy <strong>volume</strong> of base asset in <strong>market</strong> at <strong>price</strong> or below.<br/>Returns the <strong>order_id</strong>, or success if the order was filled.</td><td><pre>{"order_id": 1}</pre><pre>{"success": true}</td></tr>

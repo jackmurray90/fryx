@@ -7,6 +7,7 @@
       <p>{{ message }}</p>
     {% endif %}
     <input type="hidden" name="market" value="XMRBTC"/>
+    {{ csrf|safe }}
     <p><input name="withdrawal_address" size="100" placeholder="Your Bitcoin address"/></p>
     <p><input name="refund_address" size="100" placeholder="Your Monero refund address"/></p>
     <p><input type="Submit" id="action" value="Sell Monero"/></p>
