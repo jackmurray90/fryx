@@ -122,6 +122,7 @@ class BlockchainMonitor:
       session.commit()
       session.commit()
       asset = assets[auto.market.currency.name if auto.order_type == OrderType.SELL else auto.market.asset.name]
+      other_asset = assets[auto.market.currency.name if auto.order_type == OrderType.BUY else auto.market.asset.name]
       withdrawal_amount -= asset.withdrawal_fee()
       if withdrawal_amount > 0:
         try:
